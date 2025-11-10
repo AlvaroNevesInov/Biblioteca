@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Laravel\Fortify\Fortify;
+use Livewire\Livewire;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,5 +18,10 @@ class AppServiceProvider extends ServiceProvider
         Fortify::registerView(function () {
             return view('auth.register');
         });
+
+        // Registar componentes Livewire manualmente
+        Livewire::component('editoras-table', \App\Http\Livewire\EditorasTable::class);
+        Livewire::component('autores-table', \App\Http\Livewire\AutoresTable::class);
+        Livewire::component('livros-table', \App\Http\Livewire\LivrosTable::class);
     }
 }
