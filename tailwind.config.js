@@ -24,4 +24,17 @@ export default {
 
     plugins: [forms, typography, daisyui],
 
+    daisyui: {
+        themes: [
+            "light",
+            "dark",
+            "cupcake",
+            "corporate",
+            "business",
+        ],
+        darkTheme: "dark", // tema padrão para dark mode
+        base: true, // aplica estilos base do DaisyUI
+        styled: true, // inclui estilos dos componentes
+        utils: true, // adiciona classes utilitárias
+    },
 };
