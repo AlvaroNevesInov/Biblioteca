@@ -11,7 +11,7 @@ class EditorasTable extends Component
     use WithPagination;
 
     public $search = '';
-    public $sortField = 'nome';
+    public $sortField = 'id';
     public $sortDirection = 'asc';
     public $perPage = 10;
 

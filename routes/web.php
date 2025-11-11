@@ -6,7 +6,7 @@ use App\Http\Controllers\AutorController;
 use App\Http\Controllers\EditoraController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Route::middleware([

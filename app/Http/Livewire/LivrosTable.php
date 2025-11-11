@@ -16,9 +16,14 @@ class LivrosTable extends Component
     public $perPage = 10;
     public $filterEditora = '';
 
-    protected $queryString = ['search', 'sortField', 'sortDirection'];
+    protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora'];
 
     public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingFilterEditora()
     {
         $this->resetPage();
     }
@@ -44,8 +49,10 @@ class LivrosTable extends Component
     {
         $livros = Livro::with(['editora', 'autores'])
             ->when($this->search, function ($query) {
-                $query->where('nome', 'like', '%' . $this->search . '%')
-                    ->orWhere('isbn', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('nome', 'like', '%' . $this->search . '%')
+                      ->orWhere('isbn', 'like', '%' . $this->search . '%');
+                });
             })
             ->when($this->filterEditora, function ($query) {
                 $query->where('editora_id', $this->filterEditora);

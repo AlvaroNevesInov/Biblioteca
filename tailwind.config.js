@@ -10,8 +10,14 @@ export default {
         './vendor/laravel/jetstream/**/*.blade.php',
         './storage/framework/views/*.php',
         './resources/views/**/*.blade.php',
+        './app/Http/Livewire/**/*.php',
         './resources/**/*.js',
         './resources/**/*.vue',
+    ],
+
+    safelist: [
+        'h-[50px]',
+        'w-[50px]',
     ],
 
     theme: {
