@@ -69,4 +69,68 @@ class UserFactory extends Factory
             'ownedTeams'
         );
     }
+
+    /**
+     * Criar utilizador administrador
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Administrador',
+            'email' => 'admin@biblioteca.pt',
+            'password' => Hash::make('admin123'),
+        ]);
+    }
+
+    /**
+     * Criar utilizador com nomes portugueses
+     */
+    public function portuguese(): static
+    {
+        return $this->state(function (array $attributes) {
+            $primeiroNomes = [
+                'João', 'Maria', 'José', 'Ana', 'António', 'Francisca',
+                'Pedro', 'Inês', 'Manuel', 'Catarina', 'Rui', 'Sofia',
+                'Luís', 'Beatriz', 'Carlos', 'Rita', 'Paulo', 'Diana',
+                'Miguel', 'Mariana', 'Tiago', 'Carolina'
+            ];
+
+            $apelidos = [
+                'Silva', 'Santos', 'Ferreira', 'Oliveira', 'Costa',
+                'Rodrigues', 'Martins', 'Pereira', 'Carvalho', 'Almeida',
+                'Sousa', 'Ribeiro', 'Lopes', 'Gomes', 'Marques',
+                'Fernandes', 'Gonçalves', 'Pinto', 'Moreira'
+            ];
+
+            $nome = $primeiroNomes[array_rand($primeiroNomes)] . ' ' .
+                    $apelidos[array_rand($apelidos)] . ' ' .
+                    $apelidos[array_rand($apelidos)];
+
+            return [
+                'name' => $nome,
+            ];
+        });
+    }
+
+    /**
+     * Criar utilizador verificado
+     */
+    public function verified(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'email_verified_at' => now(),
+        ]);
+    }
+
+    /**
+     * Criar utilizador de teste
+     */
+    public function testUser(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => Hash::make('password123'),
+        ]);
+    }
 }
