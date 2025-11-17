@@ -22,10 +22,11 @@ class DatabaseSeeder extends Seeder
         // Criar 1 administrador
         User::factory()->admin()->verified()->create();
 
-        // Criar 15 utilizadores portugueses
+        // Criar 15 utilizadores portugueses (cidadãos)
         User::factory()
             ->count(15)
             ->portuguese()
+            ->cidadao()
             ->verified()
             ->create();
 
@@ -183,5 +184,6 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('✅ Base de dados populada com sucesso!');
         $this->command->info('📚 8 Editoras | 10 Autores | 10 Livros');
+        $this->command->info('👥 1 Admin + 15 Cidadãos');
     }
 }

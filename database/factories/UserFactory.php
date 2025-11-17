@@ -36,6 +36,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'profile_photo_path' => null,
             'current_team_id' => null,
+            'role' => 'cidadao', // role padrão
         ];
     }
 
@@ -79,6 +80,17 @@ class UserFactory extends Factory
             'name' => 'Administrador',
             'email' => 'admin@biblioteca.pt',
             'password' => Hash::make('admin123'),
+            'role' => 'admin',
+        ]);
+    }
+
+    /**
+     * Criar utilizador cidadão
+     */
+    public function cidadao(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'cidadao',
         ]);
     }
 
@@ -131,6 +143,7 @@ class UserFactory extends Factory
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => Hash::make('password123'),
+            'role' => 'cidadao',
         ]);
     }
 }

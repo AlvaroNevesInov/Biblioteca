@@ -19,16 +19,37 @@ Route::middleware([
         return view('dashboard');
     })->name('dashboard');
 
-    // Rota de exportação ANTES do resource (importante!)
-    Route::get('/livros/exportar-excel', [LivroExportController::class, 'exportarExcel'])
-        ->name('livros.export.excel');
+    // =========================================
+    // ROTAS APENAS PARA ADMIN
+    // =========================================
+    Route::middleware(['admin'])->group(function () {
+        // Rota de exportação ANTES do resource (importante!)
+        Route::get('/livros/exportar-excel', [LivroExportController::class, 'exportarExcel'])
+            ->name('livros.export.excel');
 
-    // Rotas de Livros
-    Route::resource('livros', LivroController::class);
+        // Rotas de Livros (criar, editar, eliminar)
+        Route::resource('livros', LivroController::class)->except(['index', 'show']);
 
-    // Rotas de Autores
-    Route::resource('autores', AutorController::class);
+        // Rotas de Autores (criar, editar, eliminar)
+        Route::resource('autores', AutorController::class)->except(['index', 'show']);
 
-    // Rotas de Editoras
-    Route::resource('editoras', EditoraController::class);
+        // Rotas de Editoras (criar, editar, eliminar)
+        Route::resource('editoras', EditoraController::class)->except(['index', 'show']);
+    });
+
+    // =========================================
+    // ROTAS PARA TODOS OS UTILIZADORES AUTENTICADOS
+    // =========================================
+
+    // Listar livros (todos podem ver)
+    Route::get('/livros', [LivroController::class, 'index'])->name('livros.index');
+    Route::get('/livros/{livro}', [LivroController::class, 'show'])->name('livros.show');
+
+    // Listar autores (todos podem ver)
+    Route::get('/autores', [AutorController::class, 'index'])->name('autores.index');
+    Route::get('/autores/{autor}', [AutorController::class, 'show'])->name('autores.show');
+
+    // Listar editoras (todos podem ver)
+    Route::get('/editoras', [EditoraController::class, 'index'])->name('editoras.index');
+    Route::get('/editoras/{editora}', [EditoraController::class, 'show'])->name('editoras.show');
 });

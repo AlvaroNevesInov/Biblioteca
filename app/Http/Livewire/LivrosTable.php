@@ -15,6 +15,8 @@ class LivrosTable extends Component
     public $sortDirection = 'asc';
     public $perPage = 10;
     public $filterEditora = '';
+    public $confirmingDelete = false;
+    public $livroToDelete = null;
 
     protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora'];
 
@@ -39,10 +41,25 @@ class LivrosTable extends Component
         $this->sortField = $field;
     }
 
-    public function delete($id)
+    public function confirmDelete($id)
     {
-        Livro::find($id)->delete();
-        session()->flash('success', 'Livro excluído com sucesso!');
+        $this->livroToDelete = $id;
+        $this->confirmingDelete = true;
+    }
+
+    public function delete()
+    {
+        if ($this->livroToDelete) {
+            $livro = Livro::find($this->livroToDelete);
+
+            if ($livro) {
+                $livro->delete();
+                session()->flash('success', 'Livro eliminado com sucesso!');
+            }
+        }
+
+        $this->confirmingDelete = false;
+        $this->livroToDelete = null;
     }
 
     public function render()

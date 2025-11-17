@@ -5,7 +5,8 @@
                 {{ __('Gestão de Livros') }}
             </h2>
 
-            <!-- Botão Download PDF com DaisyUI -->
+            @if(auth()->user()->isAdmin())
+            <!-- Botão Download PDF com DaisyUI (apenas para Admin) -->
             <div class="flex gap-2">
                 <!-- Botão Principal -->
                 <a href="{{ route('livros.export.excel') }}" class="btn btn-primary gap-2">
@@ -23,7 +24,6 @@
                         </svg>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-
                         <li>
                             <a href="{{ route('livros.export.excel') }}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -32,10 +32,18 @@
                                 Exportar Excel
                             </a>
                         </li>
-
                     </ul>
                 </div>
             </div>
+            @else
+            <!-- Badge indicando que o utilizador é Cidadão -->
+            <div class="badge badge-info gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-4 h-4 stroke-current">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+                Modo Consulta
+            </div>
+            @endif
         </div>
     </x-slot>
 
@@ -47,6 +55,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(!auth()->user()->isAdmin())
+                <div class="alert alert-info mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <span>Está a visualizar o catálogo de livros. Apenas administradores podem gerir os livros.</span>
                 </div>
             @endif
 

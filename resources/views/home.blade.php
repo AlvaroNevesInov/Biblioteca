@@ -53,7 +53,7 @@
             <main class="flex max-w-[335px] w-full flex-col-reverse lg:max-w-4xl lg:flex-row">
                 <div class="text-[13px] leading-[20px] flex-1 p-6 pb-12 lg:p-20 bg-white dark:bg-[#0a0a0a] shadow-[inset_0px_0px_0px_1px_rgba(26,26,0,0.16)] dark:shadow-[inset_0px_0px_0px_1px_#fffaed2d] rounded-bl-lg rounded-br-lg lg:rounded-tl-lg lg:rounded-br-none">
                     <h1 class="mb-1 font-medium">Bem-vindo à Biblioteca</h1>
-                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Explore o nosso acervo e descubra o prazer da leitura. <br>Comece por aqui:</p>
+                    <p class="mb-2 text-[#706f6c] dark:text-[#A1A09A]">Explore o nosso arquivo e descubra o prazer da leitura.</p>
 
                 </div>
                 <div class="bg-[#e8f5ff] dark:bg-[#0a2540] relative lg:-ml-px -mb-px lg:mb-0 rounded-t-lg lg:rounded-t-none lg:rounded-r-lg aspect-[335/376] lg:aspect-auto w-full lg:w-[438px] shrink-0 overflow-hidden flex items-center justify-center">
