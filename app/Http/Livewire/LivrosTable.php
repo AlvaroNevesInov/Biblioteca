@@ -5,6 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Livro;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Auth;
 
 class LivrosTable extends Component
 {
@@ -17,8 +18,17 @@ class LivrosTable extends Component
     public $filterEditora = '';
     public $confirmingDelete = false;
     public $livroToDelete = null;
+    public $isAdmin = false;
 
     protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora'];
+
+    public function mount()
+    {
+        /** @var \App\Models\User|null $user */
+        $user = \Illuminate\Support\Facades\Auth::user();
+
+        $this->isAdmin = $user ? $user->isAdmin() : false;
+    }
 
     public function updatingSearch()
     {
@@ -26,6 +36,11 @@ class LivrosTable extends Component
     }
 
     public function updatingFilterEditora()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPerPage()
     {
         $this->resetPage();
     }

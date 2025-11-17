@@ -40,7 +40,22 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Card Gestão de Utilizadores -->
+                    <a href="{{ route('admin.users.index') }}" class="block">
+                        <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105">
+                            <div class="p-8 text-center">
+                                <div class="mb-4">
+                                    <svg class="w-20 h-20 mx-auto text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                    </svg>
+                                </div>
+                                <h3 class="text-2xl font-bold text-gray-800 mb-2">Utilizadores</h3>
+                                <p class="text-gray-600">Gerir utilizadores do sistema</p>
+                            </div>
+                        </div>
+                    </a>
+
                     <!-- Card Autores -->
                     <a href="{{ route('autores.index') }}" class="block">
                         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg hover:shadow-2xl transition-shadow duration-300 transform hover:scale-105">

@@ -5,6 +5,7 @@ use App\Http\Controllers\LivroController;
 use App\Http\Controllers\AutorController;
 use App\Http\Controllers\EditoraController;
 use App\Http\Controllers\LivroExportController;
+use App\Http\Controllers\UserManagementController;
 
 Route::get('/', function () {
     return view('home');
@@ -35,6 +36,11 @@ Route::middleware([
 
         // Rotas de Editoras (criar, editar, eliminar)
         Route::resource('editoras', EditoraController::class)->except(['index', 'show']);
+
+        // Rotas de Gestão de Utilizadores (apenas para admins)
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::resource('users', UserManagementController::class)->except(['show']);
+        });
     });
 
     // =========================================
