@@ -6,6 +6,7 @@ use App\Http\Controllers\AutorController;
 use App\Http\Controllers\EditoraController;
 use App\Http\Controllers\LivroExportController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\RequisicaoController;
 
 Route::get('/', function () {
     return view('home');
@@ -41,6 +42,14 @@ Route::middleware([
         Route::prefix('admin')->name('admin.')->group(function () {
             Route::resource('users', UserManagementController::class)->except(['show']);
         });
+
+        // Rotas de Requisições - Ações Admin
+        Route::patch('/requisicoes/{requisicao}/aprovar', [RequisicaoController::class, 'aprovar'])
+            ->name('requisicoes.aprovar');
+        Route::patch('/requisicoes/{requisicao}/rejeitar', [RequisicaoController::class, 'rejeitar'])
+            ->name('requisicoes.rejeitar');
+        Route::patch('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'devolver'])
+            ->name('requisicoes.devolver');
     });
 
     // =========================================
@@ -58,4 +67,7 @@ Route::middleware([
     // Listar editoras (todos podem ver)
     Route::get('/editoras', [EditoraController::class, 'index'])->name('editoras.index');
     Route::get('/editoras/{editora}', [EditoraController::class, 'show'])->name('editoras.show');
+
+    // Rotas de Requisições (todos podem ver as suas e criar novas)
+    Route::resource('requisicoes', RequisicaoController::class)->except(['show']);
 });

@@ -24,5 +24,6 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('autores-table', \App\Http\Livewire\AutoresTable::class);
         Livewire::component('livros-table', \App\Http\Livewire\LivrosTable::class);
         Livewire::component('users-table', \App\Http\Livewire\UsersTable::class);
+        Livewire::component('requisicoes-table', \App\Http\Livewire\RequisicoesTable::class);
     }
 }

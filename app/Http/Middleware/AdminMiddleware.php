@@ -4,25 +4,21 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdminMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $user = $request->user(); // funciona com session e tokens
 
-    /** @var \App\Models\User|null $user */
-    $user = \Illuminate\Support\Facades\Auth::user();
+        if (!$user || method_exists($user, 'isAdmin') === false || !$user->isAdmin()) {
+            abort(403, 'Acesso negado.');
+        }
 
-    if (!$user || !$user->isAdmin()) {
-        abort(403, 'Acesso negado.');
-    }
-
-    return $next($request);
+        return $next($request);
     }
 }

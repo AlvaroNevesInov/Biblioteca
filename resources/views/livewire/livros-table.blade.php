@@ -1,4 +1,4 @@
-<div class="p-6">
+<div class="">
     <div class="flex justify-between mb-4 gap-4">
         <div class="flex-1">
             <input
@@ -72,8 +72,11 @@
                             <span>{!! $sortDirection === 'asc' ? '&#8593;' : '&#8595;' !!}</span>
                         @endif
                     </th>
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32">
+                        Disponibilidade
+                    </th>
                     @if($this->isAdmin)
-                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-48">
+                    <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-72">
                         Ações
                     </th>
                     @endif
@@ -109,21 +112,48 @@
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
                             {{ $livro->preco ? '€ ' . number_format($livro->preco, 2, ',', '.') : 'N/A' }}
                         </td>
+                        <td class="px-4 py-4 whitespace-nowrap text-center">
+                            <div class="flex justify-center gap-2">
+                                @if($livro->estaDisponivel())
+                                    <a href="{{ route('requisicoes.create', ['livro_id' => $livro->id]) }}"
+                                    class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition"
+                                    title="Requisitar Livro">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                        Requisitar
+                                    </a>
+                                @else
+                                    <span class="btn btn-error btn-sm cursor-not-allowed"
+                                        title="Livro não disponível">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                        Indisponível
+                                    </span>
+                                @endif
+                            </div>
+                        </td>
                         @if($this->isAdmin)
                             <td class="px-4 py-4 whitespace-nowrap text-center">
                                 <div class="flex justify-center gap-2">
-                                    <a href="{{ route('livros.edit', $livro->id) }}" class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition" title="Editar">
+                                    <!-- Botão Editar -->
+                                    <a href="{{ route('livros.edit', $livro->id) }}"
+                                    class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow-sm transition"
+                                    title="Editar">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                         </svg>
                                         Editar
                                     </a>
-                                    <button
-                                        wire:click="confirmDelete({{ $livro->id }})"
-                                        class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded shadow-sm transition"
-                                        title="Eliminar"
-                                        type="button"
-                                    >
+
+                                    <!-- Botão Eliminar -->
+                                    <button wire:click="confirmDelete({{ $livro->id }})"
+                                            class="inline-flex items-center px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded shadow-sm transition"
+                                            title="Eliminar"
+                                            type="button">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>

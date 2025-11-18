@@ -24,10 +24,7 @@ class LivrosTable extends Component
 
     public function mount()
     {
-        /** @var \App\Models\User|null $user */
-        $user = \Illuminate\Support\Facades\Auth::user();
-
-        $this->isAdmin = $user ? $user->isAdmin() : false;
+        $this->isAdmin = optional(Auth::user())->isAdmin();
     }
 
     public function updatingSearch()
@@ -78,25 +75,26 @@ class LivrosTable extends Component
     }
 
     public function render()
-    {
-        $livros = Livro::with(['editora', 'autores'])
-            ->when($this->search, function ($query) {
-                $query->where(function ($q) {
-                    $q->where('nome', 'like', '%' . $this->search . '%')
-                      ->orWhere('isbn', 'like', '%' . $this->search . '%');
-                });
-            })
-            ->when($this->filterEditora, function ($query) {
-                $query->where('editora_id', $this->filterEditora);
-            })
-            ->orderBy($this->sortField, $this->sortDirection)
-            ->paginate($this->perPage);
+{
+    $livros = Livro::with(['editora', 'autores', 'requisicoes'])
+        ->when($this->search, function ($query) {
+            $query->where(function ($q) {
+                $q->where('nome', 'like', '%' . $this->search . '%')
+                  ->orWhere('isbn', 'like', '%' . $this->search . '%');
+            });
+        })
+        ->when($this->filterEditora, function ($query) {
+            $query->where('editora_id', $this->filterEditora);
+        })
+        ->orderBy($this->sortField, $this->sortDirection)
+        ->paginate($this->perPage);
 
-        $editoras = \App\Models\Editora::orderBy('nome')->get();
+    $editoras = \App\Models\Editora::orderBy('nome')->get();
 
-        return view('livewire.livros-table', [
-            'livros' => $livros,
-            'editoras' => $editoras,
-        ]);
-    }
+    return view('livewire.livros-table', [
+        'livros' => $livros,
+        'editoras' => $editoras,
+    ]);
+}
+
 }

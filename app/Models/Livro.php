@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Livro extends Model
 {
@@ -39,5 +40,34 @@ class Livro extends Model
     {
         return $this->belongsToMany(Autor::class, 'autor_livro')
                     ->withTimestamps();
+    }
+
+    /**
+     * Um livro pode ter muitas requisições
+     */
+    public function requisicoes(): HasMany
+    {
+        return $this->hasMany(Requisicao::class);
+    }
+
+    /**
+     * Verificar se o livro está disponível para requisição
+     */
+    public function estaDisponivel(): bool
+    {
+        // Verifica se não existe nenhuma requisição ativa (pendente ou aprovada)
+        return !$this->requisicoes()
+            ->whereIn('estado', ['pendente', 'aprovada'])
+            ->exists();
+    }
+
+    /**
+     * Obter a requisição ativa do livro (se existir)
+     */
+    public function requisicaoAtiva()
+    {
+        return $this->requisicoes()
+            ->whereIn('estado', ['pendente', 'aprovada'])
+            ->first();
     }
 }

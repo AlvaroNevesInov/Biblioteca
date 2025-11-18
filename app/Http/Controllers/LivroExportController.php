@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Livro;
 use App\Exports\LivrosExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\Auth;
 
 class LivroExportController extends Controller
 {
