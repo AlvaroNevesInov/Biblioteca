@@ -20,13 +20,18 @@ class Requisicao extends Model
         'data_requisicao',
         'data_prevista_devolucao',
         'data_devolucao',
+        'data_recepcao',
+        'recebido_por',
         'observacoes',
+
     ];
 
     protected $casts = [
+
         'data_requisicao' => 'date',
         'data_prevista_devolucao' => 'date',
         'data_devolucao' => 'date',
+        'data_recepcao' => 'date',
     ];
 
     /**
@@ -43,6 +48,53 @@ class Requisicao extends Model
     public function livro(): BelongsTo
     {
         return $this->belongsTo(Livro::class);
+    }
+
+    /**
+
+     * Admin que confirmou a recepção do livro
+
+     */
+
+    public function recebidoPor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'recebido_por');
+    }
+
+    /**
+     * Verificar se a recepção do livro foi confirmada
+     */
+
+    public function isRecebido(): bool
+    {
+        return !is_null($this->data_recepcao);
+    }
+
+
+    /**
+     * Calcular o número de dias decorridos desde a requisição até à recepção
+     */
+
+    public function diasDecorridos(): ?int
+    {
+        if (!$this->data_recepcao) {
+            return null;
+        }
+        return $this->data_requisicao->diffInDays($this->data_recepcao);
+    }
+
+    /**
+     * Calcular dias de atraso (se ultrapassou a data prevista)
+     */
+
+    public function diasAtraso(): int
+    {
+        $dataComparacao = $this->data_recepcao ?? now();
+
+        if ($dataComparacao->gt($this->data_prevista_devolucao)) {
+            return $this->data_prevista_devolucao->diffInDays($dataComparacao);
+        }
+        return 0;
     }
 
     /**

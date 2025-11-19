@@ -4,8 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Requisicao;
 use App\Models\Livro;
+use App\Models\User;
+use App\Mail\NovaRequisicaoAdmin;
+use App\Mail\NovaRequisicaoCidadao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class RequisicaoController extends Controller
@@ -23,7 +27,7 @@ class RequisicaoController extends Controller
      */
     public function create(Request $request)
     {
-        $user = Auth::user();
+        $user = optional(Auth::user());
 
         // Verificar se o cidadão pode requisitar mais livros (máximo 3)
         if (!$user->podeRequisitar()) {
@@ -60,7 +64,7 @@ class RequisicaoController extends Controller
             'observacoes' => 'nullable|string|max:500',
         ]);
 
-        $user = Auth::user();
+        $user = optional(Auth::user());
 
         // Verificar se o cidadão pode requisitar mais livros (máximo 3)
         if (!$user->podeRequisitar()) {
@@ -98,7 +102,7 @@ class RequisicaoController extends Controller
         $file->move($uploadPath, $filename);
         $fotoCidadao = '/uploads/requisicoes/' . $filename;
 
-        Requisicao::create([
+        $requisicao = Requisicao::create([
             'user_id' => Auth::id(),
             'livro_id' => $validated['livro_id'],
             'foto_cidadao' => $fotoCidadao,
@@ -107,6 +111,30 @@ class RequisicaoController extends Controller
             'data_prevista_devolucao' => Carbon::today()->addDays(5),
             'observacoes' => $validated['observacoes'] ?? null,
         ]);
+
+        // Carregar relações para os emails
+        $requisicao->load(['livro.autores', 'livro.editora', 'user']);
+
+        // Enviar email para o cidadão (com pequeno atraso)
+
+        Mail::to($user->email)
+
+            ->later(now()->addSeconds(5), new NovaRequisicaoCidadao($requisicao));
+
+        // Enviar email para todos os administradores (com atraso maior)
+
+        $admins = User::where('role', 'admin')->get();
+
+        $delay = 65; // segundos - tempo suficiente após o primeiro email
+
+        foreach ($admins as $admin) {
+
+            Mail::to($admin->email)
+
+                ->later(now()->addSeconds($delay), new NovaRequisicaoAdmin($requisicao));
+
+            $delay += 10; // incrementa para múltiplos admins
+        }
 
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição criada com sucesso! Aguarde aprovação do administrador.');
@@ -204,6 +232,41 @@ class RequisicaoController extends Controller
 
         return redirect()->route('requisicoes.index')
             ->with('success', 'Livro marcado como devolvido!');
+    }
+
+    /**
+     * Confirmar a recepção do livro (apenas admin).
+     */
+    public function confirmarRecepcao(Request $request, Requisicao $requisicao)
+    {
+        if (!optional(Auth::user())->isAdmin()) {
+            abort(403, 'Acesso negado.');
+        }
+
+        if (!$requisicao->isDevolvida()) {
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Apenas requisições devolvidas podem ter a recepção confirmada.');
+        }
+
+        $validated = $request->validate([
+            'data_recepcao' => 'required|date|after_or_equal:' . $requisicao->data_requisicao->format('Y-m-d'),
+        ]);
+
+        $requisicao->update([
+            'data_recepcao' => $validated['data_recepcao'],
+            'recebido_por' => Auth::id(),
+        ]);
+
+        $diasDecorridos = $requisicao->diasDecorridos();
+        $diasAtraso = $requisicao->diasAtraso();
+
+        $mensagem = "Recepção do livro confirmada! Dias decorridos: {$diasDecorridos}";
+        if ($diasAtraso > 0) {
+            $mensagem .= " (Atraso de {$diasAtraso} dias)";
+        }
+
+        return redirect()->route('requisicoes.index')
+            ->with('success', $mensagem);
     }
 
     /**

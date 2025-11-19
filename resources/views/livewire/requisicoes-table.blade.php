@@ -225,6 +225,87 @@
                                         </form>
                                     @endif
 
+                                    @if($requisicao->isDevolvida() && !$requisicao->isRecebido())
+                                        <button
+                                            onclick="document.getElementById('recepcao-modal-{{ $requisicao->id }}').showModal()"
+                                            class="btn btn-xs btn-primary gap-1"
+                                            title="Confirmar Recepcao"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                            </svg>
+                                            Confirmar
+                                        </button>
+
+                                        <!-- Modal de Confirmacao de Recepcao -->
+                                        <dialog id="recepcao-modal-{{ $requisicao->id }}" class="modal">
+                                            <div class="modal-box">
+                                                <h3 class="font-bold text-lg">Confirmar Recepcao do Livro</h3>
+                                                <form action="{{ route('requisicoes.confirmar-recepcao', $requisicao) }}" method="POST" class="py-4">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <div class="form-control">
+                                                        <label class="label">
+                                                            <span class="label-text">Data de Recepcao</span>
+                                                        </label>
+                                                        <input
+                                                            type="date"
+                                                            name="data_recepcao"
+                                                            class="input input-bordered"
+                                                            value="{{ now()->format('Y-m-d') }}"
+                                                            min="{{ $requisicao->data_requisicao->format('Y-m-d') }}"
+                                                            max="{{ now()->format('Y-m-d') }}"
+                                                            required
+                                                        >
+                                                    </div>
+                                                    <div class="mt-3 text-sm text-gray-500">
+                                                        <p><strong>Data da Requisicao:</strong> {{ $requisicao->data_requisicao->format('d/m/Y') }}</p>
+                                                        <p><strong>Data Prevista:</strong> {{ $requisicao->data_prevista_devolucao->format('d/m/Y') }}</p>
+                                                    </div>
+                                                    <div class="modal-action">
+                                                        <button type="button" class="btn" onclick="document.getElementById('recepcao-modal-{{ $requisicao->id }}').close()">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Confirmar Recepcao</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </dialog>
+                                    @endif
+
+                                    @if($requisicao->isDevolvida() && $requisicao->isRecebido())
+                                        <button
+                                            onclick="document.getElementById('info-recepcao-modal-{{ $requisicao->id }}').showModal()"
+                                            class="btn btn-xs btn-ghost gap-1"
+                                            title="Ver Detalhes da Recepcao"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            Recebido
+                                        </button>
+
+                                        <!-- Modal de Informacao da Recepcao -->
+                                        <dialog id="info-recepcao-modal-{{ $requisicao->id }}" class="modal">
+                                            <div class="modal-box">
+                                                <h3 class="font-bold text-lg">Detalhes da Recepcao</h3>
+                                                <div class="py-4 space-y-2">
+                                                    <p><strong>Data de Recepcao:</strong> {{ $requisicao->data_recepcao->format('d/m/Y') }}</p>
+                                                    <p><strong>Dias Decorridos:</strong> {{ $requisicao->diasDecorridos() }} dias</p>
+                                                    @if($requisicao->diasAtraso() > 0)
+                                                        <p class="text-error"><strong>Dias de Atraso:</strong> {{ $requisicao->diasAtraso() }} dias</p>
+                                                    @else
+                                                        <p class="text-success"><strong>Entregue dentro do prazo</strong></p>
+                                                    @endif
+                                                    @if($requisicao->recebidoPor)
+                                                        <p><strong>Recebido por:</strong> {{ $requisicao->recebidoPor->name }}</p>
+                                                    @endif
+                                                </div>
+                                                <div class="modal-action">
+                                                    <button class="btn" onclick="document.getElementById('info-recepcao-modal-{{ $requisicao->id }}').close()">Fechar</button>
+                                                </div>
+                                            </div>
+                                        </dialog>
+                                    @endif
+
                                     @if($requisicao->observacoes)
                                         <button
                                             onclick="document.getElementById('obs-modal-{{ $requisicao->id }}').showModal()"

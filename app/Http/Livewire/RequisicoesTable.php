@@ -86,7 +86,7 @@ class RequisicoesTable extends Component
 
     public function render()
     {
-        $query = Requisicao::with(['user', 'livro.editora', 'livro.autores']);
+        $query = Requisicao::with(['user', 'livro.editora', 'livro.autores', 'recebidoPor']);
 
         // Se não for admin, mostrar apenas as requisições do utilizador
         if (!$this->isAdmin) {

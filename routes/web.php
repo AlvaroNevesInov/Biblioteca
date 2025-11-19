@@ -51,7 +51,8 @@ Route::middleware([
             ->name('requisicoes.rejeitar');
         Route::patch('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'devolver'])
             ->name('requisicoes.devolver');
-
+         Route::patch('/requisicoes/{requisicao}/confirmar-recepcao', [RequisicaoController::class, 'confirmarRecepcao'])
+            ->name('requisicoes.confirmar-recepcao');
             // Rotas de Cidadãos (listagem e detalhes - apenas admin)
 
         Route::get('/cidadaos', [CidadaoController::class, 'index'])->name('cidadaos.index');

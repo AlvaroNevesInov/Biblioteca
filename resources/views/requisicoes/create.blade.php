@@ -44,36 +44,42 @@
                     <form action="{{ route('requisicoes.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
-                        <!-- Seleção de Livro -->
-                        <div class="form-control w-full mb-6">
-                            <label class="label">
-                                <span class="label-text font-semibold">Selecione o Livro <span class="text-error">*</span></span>
-                                <span class="label-text-alt">{{ $livros->count() }} livros disponíveis</span>
-                            </label>
-                            <select
-                                name="livro_id"
-                                class="select select-bordered w-full @error('livro_id') select-error @enderror"
-                                required
-                            >
-                                <option disabled {{ !isset($livro) ? 'selected' : '' }}>Escolha um livro</option>
-                                @foreach($livros as $l)
-                                    <option
-                                        value="{{ $l->id }}"
-                                        {{ (isset($livro) && $livro->id == $l->id) || old('livro_id') == $l->id ? 'selected' : '' }}
-                                    >
-                                        {{ $l->nome }} ({{ $l->isbn }}) - {{ $l->editora->nome ?? 'N/A' }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('livro_id')
+                             <!-- Seleção de Livro (apenas se não vier com livro pré-selecionado) -->
+
+                        @if(!isset($livro))
+                            <div class="form-control w-full mb-6">
                                 <label class="label">
-                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                    <span class="label-text font-semibold">Selecione o Livro <span class="text-error">*</span></span>
+                                    <span class="label-text-alt">{{ $livros->count() }} livros disponíveis</span>
                                 </label>
-                            @enderror
-                        </div>
+                                <select
+                                    name="livro_id"
+                                    class="select select-bordered w-full @error('livro_id') select-error @enderror"
+                                    required
+                                >
+                                    <option disabled selected>Escolha um livro</option>
+                                    @foreach($livros as $l)
+                                        <option
+                                            value="{{ $l->id }}"
+                                            {{ old('livro_id') == $l->id ? 'selected' : '' }}
+                                        >
+                                            {{ $l->nome }} ({{ $l->isbn }}) - {{ $l->editora->nome ?? 'N/A' }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('livro_id')
+                                    <label class="label">
+                                        <span class="label-text-alt text-error">{{ $message }}</span>
+                                    </label>
+                                @enderror
+                            </div>
+                        @endif
 
                         <!-- Livro Selecionado (se vier da página de livros) -->
+
                         @if(isset($livro))
+
+                            <input type="hidden" name="livro_id" value="{{ $livro->id }}">
                             <div class="card bg-base-200 mb-6">
                                 <div class="card-body">
                                     <h3 class="card-title text-lg">Livro Selecionado</h3>

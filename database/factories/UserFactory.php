@@ -28,7 +28,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'email' => fake()->unique()->userName() . '@yopmail.com',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'two_factor_secret' => null,
@@ -78,7 +78,7 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'name' => 'Administrador',
-            'email' => 'admin@biblioteca.pt',
+            'email' => 'admin1@yopmail.com',
             'password' => Hash::make('admin123'),
             'role' => 'admin',
         ]);
