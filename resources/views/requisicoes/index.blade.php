@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-base-content leading-tight">
-                {{ __('Minhas Requisições') }}
+                {{ __('Requisições') }}
             </h2>
 
             <div class="flex gap-2">

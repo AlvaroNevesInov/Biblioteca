@@ -89,7 +89,9 @@
                             {{ $livro->isbn }}
                         </td>
                         <td class="px-4 py-4 text-sm font-medium text-gray-900 text-center">
-                            {{ $livro->nome }}
+                            <a href="{{ route('livros.show', $livro) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                {{ $livro->nome }}
+                            </a>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500 text-center">
                             {{ $livro->editora->nome ?? 'N/A' }}

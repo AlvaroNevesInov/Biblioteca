@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -81,4 +82,50 @@ class User extends Authenticatable
     {
         return $this->role === 'cidadao';
     }
+
+     /**
+
+     * Um utilizador tem muitas requisições
+
+     */
+
+    public function requisicoes(): HasMany
+
+    {
+
+        return $this->hasMany(Requisicao::class);
+
+    }
+
+
+
+    /**
+
+     * Contar requisições ativas do utilizador
+
+     */
+
+    public function contarRequisicoesAtivas(): int
+
+    {
+
+        return $this->requisicoes()->whereIn('estado', ['pendente', 'aprovada'])->count();
+
+    }
+
+    /**
+
+     * Verificar se o utilizador pode requisitar mais livros (máximo 3)
+
+     */
+
+    public function podeRequisitar(): bool
+
+    {
+
+        return $this->contarRequisicoesAtivas() < 3;
+
+    }
+
+
 }

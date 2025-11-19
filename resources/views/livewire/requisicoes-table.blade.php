@@ -47,6 +47,11 @@
                         <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                             Utilizador
                         </th>
+                        <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+
+                            Foto
+
+                        </th>
                     @endif
                     <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Livro
@@ -85,11 +90,36 @@
                         </td>
                         @if($isAdmin)
                             <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                                {{ $requisicao->user->name }}
+                                 <a href="{{ route('cidadaos.show', $requisicao->user) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                    {{ $requisicao->user->name }}
+                                </a>
+                            </td>
+                            <td class="px-4 py-4 whitespace-nowrap text-center">
+                                @if($requisicao->foto_cidadao)
+                                    <div class="avatar">
+                                        <div class="w-[50px] h-[50px] rounded-full">
+                                            <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $requisicao->user->name }}">
+                                        </div>
+                                    </div>
+                                @elseif($requisicao->user->profile_photo_path)
+                                    <div class="avatar">
+                                        <div class="w-10 rounded-full">
+                                            <img src="{{ $requisicao->user->profile_photo_url }}" alt="{{ $requisicao->user->name }}">
+                                        </div>
+                                    </div>
+                                @else
+                                    <div class="avatar placeholder">
+                                        <div class="bg-neutral-focus text-neutral-content rounded-full w-10">
+                                            <span class="text-xs">{{ substr($requisicao->user->name, 0, 2) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
                             </td>
                         @endif
                         <td class="px-4 py-4 text-sm text-gray-900 text-center">
-                            <div class="font-medium">{{ $requisicao->livro->nome }}</div>
+                            <a href="{{ route('livros.show', $requisicao->livro) }}" class="text-blue-600 hover:text-blue-800 hover:underline">
+                                <div class="font-medium">{{ $requisicao->livro->nome }}</div>
+                            </a>
                             <div class="text-xs text-gray-500">{{ $requisicao->livro->isbn }}</div>
                         </td>
                         <td class="px-4 py-4 whitespace-nowrap text-center">
@@ -260,7 +290,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="{{ $isAdmin ? 7 : 6 }}" class="px-4 py-4 text-center text-gray-500">
+                        <td colspan="{{ $isAdmin ? 8 : 6 }}" class="px-4 py-4 text-center text-gray-500">
                             Nenhuma requisição encontrada.
                         </td>
                     </tr>

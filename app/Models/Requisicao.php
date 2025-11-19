@@ -15,6 +15,7 @@ class Requisicao extends Model
     protected $fillable = [
         'user_id',
         'livro_id',
+        'foto_cidadao',
         'estado',
         'data_requisicao',
         'data_prevista_devolucao',
@@ -106,5 +107,34 @@ class Requisicao extends Model
     public function scopeDoLivro($query, $livroId)
     {
         return $query->where('livro_id', $livroId);
+    }
+
+    /**
+
+     * Scope para requisições passadas (devolvidas ou rejeitadas)
+
+     */
+
+    public function scopePassadas($query)
+
+    {
+
+        return $query->whereIn('estado', ['devolvida', 'rejeitada']);
+
+    }
+
+
+    /**
+
+     * Scope para ordenar por data de requisição decrescente
+
+     */
+
+    public function scopeRecentes($query)
+
+    {
+
+        return $query->orderBy('data_requisicao', 'desc');
+
     }
 }

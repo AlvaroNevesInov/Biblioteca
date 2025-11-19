@@ -14,6 +14,29 @@ class LivroController extends Controller
         return view('livros.index');
     }
 
+     public function show(Livro $livro)
+    {
+        $livro->load(['editora', 'autores', 'requisicoes.user']);
+        // Separar requisições ativas e passadas
+
+        $requisicoesAtivas = $livro->requisicoes()
+
+            ->with('user')
+            ->ativas()
+            ->recentes()
+            ->get();
+
+        $requisicoesPast = $livro->requisicoes()
+
+            ->with('user')
+            ->passadas()
+            ->recentes()
+            ->get();
+
+        return view('livros.show', compact('livro', 'requisicoesAtivas', 'requisicoesPast'));
+
+    }
+
     public function create()
     {
         $editoras = Editora::orderBy('nome')->get();

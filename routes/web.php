@@ -7,6 +7,7 @@ use App\Http\Controllers\EditoraController;
 use App\Http\Controllers\LivroExportController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RequisicaoController;
+use App\Http\Controllers\CidadaoController;
 
 Route::get('/', function () {
     return view('home');
@@ -50,6 +51,11 @@ Route::middleware([
             ->name('requisicoes.rejeitar');
         Route::patch('/requisicoes/{requisicao}/devolver', [RequisicaoController::class, 'devolver'])
             ->name('requisicoes.devolver');
+
+            // Rotas de Cidadãos (listagem e detalhes - apenas admin)
+
+        Route::get('/cidadaos', [CidadaoController::class, 'index'])->name('cidadaos.index');
+        Route::get('/cidadaos/{cidadao}', [CidadaoController::class, 'show'])->name('cidadaos.show');
     });
 
     // =========================================

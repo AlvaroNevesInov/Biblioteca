@@ -23,6 +23,14 @@ class RequisicaoController extends Controller
      */
     public function create(Request $request)
     {
+        $user = Auth::user();
+
+        // Verificar se o cidadão pode requisitar mais livros (máximo 3)
+        if (!$user->podeRequisitar()) {
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Já atingiu o limite máximo de 3 livros requisitados em simultâneo. Devolva um livro para poder requisitar outro.');
+        }
+
         $livro = null;
         if ($request->has('livro_id')) {
             $livro = Livro::with(['editora', 'autores'])->findOrFail($request->livro_id);
@@ -48,8 +56,17 @@ class RequisicaoController extends Controller
     {
         $validated = $request->validate([
             'livro_id' => 'required|exists:livros,id',
+            'foto_cidadao' => 'required|image|max:2048',
             'observacoes' => 'nullable|string|max:500',
         ]);
+
+        $user = Auth::user();
+
+        // Verificar se o cidadão pode requisitar mais livros (máximo 3)
+        if (!$user->podeRequisitar()) {
+            return redirect()->route('requisicoes.index')
+                ->with('error', 'Já atingiu o limite máximo de 3 livros requisitados em simultâneo.');
+        }
 
         $livro = Livro::findOrFail($validated['livro_id']);
 
@@ -68,13 +85,27 @@ class RequisicaoController extends Controller
                 ->with('error', 'Já tem uma requisição ativa deste livro.');
         }
 
+        // Upload da foto do cidadão (obrigatório - já validado)
+        $file = $request->file('foto_cidadao');
+        $filename = time() . '_' . uniqid() . '_' . $file->getClientOriginalName();
+        $uploadPath = public_path('uploads/requisicoes');
+
+        // Criar pasta se não existir
+        if (!file_exists($uploadPath)) {
+            mkdir($uploadPath, 0755, true);
+        }
+
+        $file->move($uploadPath, $filename);
+        $fotoCidadao = '/uploads/requisicoes/' . $filename;
+
         Requisicao::create([
             'user_id' => Auth::id(),
             'livro_id' => $validated['livro_id'],
+            'foto_cidadao' => $fotoCidadao,
             'estado' => 'pendente',
             'data_requisicao' => Carbon::today(),
-            'data_prevista_devolucao' => Carbon::today()->addDays(14),
-            'observacoes' => $validated['observacoes'],
+            'data_prevista_devolucao' => Carbon::today()->addDays(5),
+            'observacoes' => $validated['observacoes'] ?? null,
         ]);
 
         return redirect()->route('requisicoes.index')

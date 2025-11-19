@@ -35,12 +35,13 @@
                             <div class="text-xs">
                                 • Apenas livros disponíveis podem ser requisitados<br>
                                 • A sua requisição será analisada por um administrador<br>
-                                • Prazo padrão de devolução: 14 dias
+                                • Prazo padrão de devolução: <strong>5 dias</strong><br>
+                                • Limite máximo de livros em simultâneo: <strong>3 livros</strong>
                             </div>
                         </div>
                     </div>
 
-                    <form action="{{ route('requisicoes.store') }}" method="POST">
+                    <form action="{{ route('requisicoes.store') }}" method="POST" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Seleção de Livro -->
@@ -95,6 +96,33 @@
                                 </div>
                             </div>
                         @endif
+
+
+                        <!-- Foto do Cidadão -->
+
+                        <div class="form-control w-full mb-6">
+                            <label class="label">
+                                <span class="label-text font-semibold">Foto de Identificação <span class="text-error">*</span></span>
+                                <span class="label-text-alt">Obrigatório</span>
+                            </label>
+                            <input
+
+                                type="file"
+                                name="foto_cidadao"
+                                accept="image/*"
+                                class="file-input file-input-bordered w-full @error('foto_cidadao') file-input-error @enderror"
+                                required
+                            >
+
+                            @error('foto_cidadao')
+                                <label class="label">
+                                    <span class="label-text-alt text-error">{{ $message }}</span>
+                                </label>
+                            @enderror
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/60">Envie uma foto sua para registo da requisição</span>
+                            </label>
+                        </div>
 
                         <!-- Observações -->
                         <div class="form-control w-full mb-6">
