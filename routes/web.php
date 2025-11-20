@@ -76,5 +76,8 @@ Route::middleware([
     Route::get('/editoras/{editora}', [EditoraController::class, 'show'])->name('editoras.show');
 
     // Rotas de Requisições (todos podem ver as suas e criar novas)
-    Route::resource('requisicoes', RequisicaoController::class)->except(['show']);
+    Route::resource('requisicoes', RequisicaoController::class)
+
+        ->except(['show'])
+        ->parameters(['requisicoes' => 'requisicao']);
 });
