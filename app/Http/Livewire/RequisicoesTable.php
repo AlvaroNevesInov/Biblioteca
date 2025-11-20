@@ -116,8 +116,30 @@ class RequisicoesTable extends Component
 
         $requisicoes = $query->paginate($this->perPage);
 
+        // Calcular indicadores
+        $statsQuery = Requisicao::query();
+        if (!$this->isAdmin) {
+            $statsQuery->where('user_id', Auth::id());
+        }
+
+        $requisicoesAtivas = (clone $statsQuery)
+            ->where('estado', 'aprovada')
+            ->whereNull('data_devolucao')
+            ->count();
+
+        $requisicoesUltimos30Dias = (clone $statsQuery)
+            ->where('data_requisicao', '>=', now()->subDays(30))
+            ->count();
+
+        $livrosEntreguesHoje = (clone $statsQuery)
+            ->whereDate('data_devolucao', today())
+            ->count();
+
         return view('livewire.requisicoes-table', [
             'requisicoes' => $requisicoes,
+            'requisicoesAtivas' => $requisicoesAtivas,
+            'requisicoesUltimos30Dias' => $requisicoesUltimos30Dias,
+            'livrosEntreguesHoje' => $livrosEntreguesHoje,
         ]);
     }
 }
