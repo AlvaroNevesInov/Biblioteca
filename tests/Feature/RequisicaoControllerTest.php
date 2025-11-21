@@ -98,6 +98,61 @@ class RequisicaoControllerTest extends TestCase
     }
 
     /**
+     * Teste: Foto de perfil é atualizada automaticamente quando cidadão sem foto faz requisição
+     */
+    public function test_foto_perfil_atualizada_quando_cidadao_faz_primeira_requisicao(): void
+    {
+        Mail::fake();
+        Storage::fake('public');
+
+        $user = User::factory()->cidadao()->create(['profile_photo_path' => null]);
+        $livro = Livro::factory()->create();
+
+        $this->assertNull($user->profile_photo_path);
+
+        $foto = UploadedFile::fake()->image('foto.jpg', 800, 600);
+
+        $response = $this->actingAs($user)->post(route('requisicoes.store'), [
+            'livro_id' => $livro->id,
+            'foto_cidadao' => $foto,
+            'observacoes' => 'Minha primeira requisição',
+        ]);
+
+        $response->assertRedirect(route('requisicoes.index'));
+
+        $user->refresh();
+        $this->assertNotNull($user->profile_photo_path);
+        $this->assertStringContainsString('profile-photos/', $user->profile_photo_path);
+
+        // Verificar que a foto foi copiada para o storage
+        Storage::disk('public')->assertExists($user->profile_photo_path);
+    }
+
+    /**
+     * Teste: Foto de perfil não é atualizada se cidadão já tiver uma foto
+     */
+    public function test_foto_perfil_nao_atualizada_se_cidadao_ja_tem_foto(): void
+    {
+        Mail::fake();
+
+        $fotoPerfilOriginal = '/uploads/profile/foto_antiga.jpg';
+        $user = User::factory()->cidadao()->create(['profile_photo_path' => $fotoPerfilOriginal]);
+        $livro = Livro::factory()->create();
+
+        $foto = UploadedFile::fake()->image('foto_nova.jpg', 800, 600);
+
+        $response = $this->actingAs($user)->post(route('requisicoes.store'), [
+            'livro_id' => $livro->id,
+            'foto_cidadao' => $foto,
+        ]);
+
+        $response->assertRedirect(route('requisicoes.index'));
+
+        $user->refresh();
+        $this->assertEquals($fotoPerfilOriginal, $user->profile_photo_path);
+    }
+
+    /**
      * Teste: Cidadão não pode criar requisição sem foto
      */
     public function test_cidadao_nao_pode_criar_requisicao_sem_foto(): void

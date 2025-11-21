@@ -10,6 +10,7 @@ use App\Mail\NovaRequisicaoCidadao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
 class RequisicaoController extends Controller
@@ -101,6 +102,22 @@ class RequisicaoController extends Controller
 
         $file->move($uploadPath, $filename);
         $fotoCidadao = '/uploads/requisicoes/' . $filename;
+
+        // Se o cidadão ainda não tem foto de perfil, copia a foto para o storage
+        if (!$user->profile_photo_path) {
+            // Copiar a foto para o storage/app/public/profile-photos
+            $sourceFile = $uploadPath . '/' . $filename;
+            $profilePhotoPath = 'profile-photos/' . $filename;
+
+            Storage::disk('public')->put(
+                $profilePhotoPath,
+                file_get_contents($sourceFile)
+            );
+
+            $user->update([
+                'profile_photo_path' => $profilePhotoPath
+            ]);
+        }
 
         $requisicao = Requisicao::create([
             'user_id' => Auth::id(),

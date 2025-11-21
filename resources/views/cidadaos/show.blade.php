@@ -119,8 +119,8 @@
                                             <td>
                                                 @if($requisicao->foto_cidadao)
                                                     <div class="avatar">
-                                                        <div class="w-10 rounded-full">
-                                                            <img src="{{ Storage::url($requisicao->foto_cidadao) }}" alt="{{ $cidadao->name }}">
+                                                        <div class="w-[50px] rounded-full">
+                                                            <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $cidadao->name }}">
                                                         </div>
                                                     </div>
 
@@ -198,8 +198,8 @@
                                             <td>
                                                 @if($requisicao->foto_cidadao)
                                                     <div class="avatar">
-                                                        <div class="w-10 rounded-full">
-                                                            <img src="{{ Storage::url($requisicao->foto_cidadao) }}" alt="{{ $cidadao->name }}">
+                                                        <div class="w-[50px] rounded-full">
+                                                            <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $cidadao->name }}">
                                                         </div>
                                                     </div>
                                                 @else

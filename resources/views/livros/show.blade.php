@@ -165,8 +165,8 @@
                                             <td>
                                                 @if($requisicao->foto_cidadao)
                                                     <div class="avatar">
-                                                        <div class="w-10 rounded-full">
-                                                            <img src="{{ Storage::url($requisicao->foto_cidadao) }}" alt="{{ $requisicao->user->name }}">
+                                                        <div class="w-[50px] rounded-full">
+                                                            <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $requisicao->user->name }}">
                                                         </div>
                                                     </div>
                                                 @elseif($requisicao->user->profile_photo_path)
@@ -243,8 +243,8 @@
                                             <td>
                                                 @if($requisicao->foto_cidadao)
                                                     <div class="avatar">
-                                                        <div class="w-10 rounded-full">
-                                                            <img src="{{ Storage::url($requisicao->foto_cidadao) }}" alt="{{ $requisicao->user->name }}">
+                                                        <div class="w-[50px] h rounded-full">
+                                                            <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $requisicao->user->name }}">
                                                         </div>
                                                     </div>
                                                 @elseif($requisicao->user->profile_photo_path)
