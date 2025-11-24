@@ -106,7 +106,7 @@
                                                     @if($requisicao->livro->imagem_capa)
                                                         <div class="avatar">
                                                             <div class="mask mask-squircle w-[50px] h-[50px]">
-                                                                <img src="{{ $requisicao->livro->imagem_capa }}" alt="{{ $requisicao->livro->nome }}">
+                                                                <img src="{{ asset('storage/' . $requisicao->livro->imagem_capa) }}" alt="{{ $requisicao->livro->nome }}">
                                                             </div>
                                                         </div>
                                                     @endif

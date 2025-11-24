@@ -85,7 +85,7 @@
                                     <h3 class="card-title text-lg">Livro Selecionado</h3>
                                     <div class="flex gap-4">
                                         @if($livro->imagem_capa)
-                                            <img src="{{ $livro->imagem_capa }}" alt="{{ $livro->nome }}" class="h-32 w-24 object-cover rounded shadow">
+                                            <img src="{{ asset('storage/' . $livro->imagem_capa) }}" alt="{{ $livro->nome }}" class="h-32 w-24 object-cover rounded shadow">
                                         @endif
                                         <div class="flex-1">
                                             <p class="font-bold">{{ $livro->nome }}</p>

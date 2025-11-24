@@ -3,6 +3,7 @@
 namespace App\Http\Livewire;
 
 use App\Models\Livro;
+use App\Services\GoogleBooksService;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Auth;
@@ -19,8 +20,12 @@ class LivrosTable extends Component
     public $confirmingDelete = false;
     public $livroToDelete = null;
     public $isAdmin = false;
+    public $searchMode = 'local'; // 'local' ou 'api'
+    public $apiResults = [];
+    public $apiTotalResults = 0;
+    public $apiCurrentPage = 1;
 
-    protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora'];
+    protected $queryString = ['search', 'sortField', 'sortDirection', 'filterEditora', 'searchMode'];
 
     public function mount()
     {
@@ -30,6 +35,7 @@ class LivrosTable extends Component
     public function updatingSearch()
     {
         $this->resetPage();
+        $this->apiCurrentPage = 1;
     }
 
     public function updatingFilterEditora()
@@ -40,6 +46,26 @@ class LivrosTable extends Component
     public function updatingPerPage()
     {
         $this->resetPage();
+    }
+
+    public function updatingSearchMode()
+    {
+        $this->resetPage();
+        $this->apiCurrentPage = 1;
+        $this->apiResults = [];
+    }
+
+    public function switchToLocal()
+    {
+        $this->searchMode = 'local';
+        $this->resetPage();
+    }
+
+    public function switchToApi()
+    {
+        $this->searchMode = 'api';
+        $this->apiCurrentPage = 1;
+        $this->apiResults = [];
     }
 
     public function sortBy($field)
@@ -74,27 +100,72 @@ class LivrosTable extends Component
         $this->livroToDelete = null;
     }
 
+    public function searchGoogleBooks($page = 1)
+    {
+        if (empty($this->search)) {
+            $this->apiResults = [];
+            $this->apiTotalResults = 0;
+            return;
+        }
+
+        $googleBooksService = app(GoogleBooksService::class);
+        $maxResults = 20;
+        $startIndex = ($page - 1) * $maxResults;
+
+        $result = $googleBooksService->search($this->search, $maxResults, $startIndex);
+
+        if ($result['success']) {
+            $this->apiResults = $result['items'];
+            $this->apiTotalResults = $result['totalItems'];
+            $this->apiCurrentPage = $page;
+        } else {
+            $this->apiResults = [];
+            $this->apiTotalResults = 0;
+            session()->flash('error', $result['error'] ?? 'Erro ao pesquisar na Google Books API');
+        }
+    }
+
+    public function nextApiPage()
+    {
+        $this->searchGoogleBooks($this->apiCurrentPage + 1);
+    }
+
+    public function previousApiPage()
+    {
+        if ($this->apiCurrentPage > 1) {
+            $this->searchGoogleBooks($this->apiCurrentPage - 1);
+        }
+    }
+
     public function render()
-{
-    $livros = Livro::with(['editora', 'autores', 'requisicoes'])
-        ->when($this->search, function ($query) {
-            $query->where(function ($q) {
-                $q->where('nome', 'like', '%' . $this->search . '%')
-                  ->orWhere('isbn', 'like', '%' . $this->search . '%');
-            });
-        })
-        ->when($this->filterEditora, function ($query) {
-            $query->where('editora_id', $this->filterEditora);
-        })
-        ->orderBy($this->sortField, $this->sortDirection)
-        ->paginate($this->perPage);
+    {
+        // Se está em modo API e tem pesquisa, busca da API
+        if ($this->searchMode === 'api' && !empty($this->search)) {
+            // Se ainda não pesquisou ou mudou a pesquisa, faz a busca
+            if (empty($this->apiResults)) {
+                $this->searchGoogleBooks(1);
+            }
+        }
 
-    $editoras = \App\Models\Editora::orderBy('nome')->get();
+        // Busca livros locais
+        $livros = Livro::with(['editora', 'autores', 'requisicoes'])
+            ->when($this->search && $this->searchMode === 'local', function ($query) {
+                $query->where(function ($q) {
+                    $q->where('nome', 'like', '%' . $this->search . '%')
+                      ->orWhere('isbn', 'like', '%' . $this->search . '%');
+                });
+            })
+            ->when($this->filterEditora, function ($query) {
+                $query->where('editora_id', $this->filterEditora);
+            })
+            ->orderBy($this->sortField, $this->sortDirection)
+            ->paginate($this->perPage);
 
-    return view('livewire.livros-table', [
-        'livros' => $livros,
-        'editoras' => $editoras,
-    ]);
-}
+        $editoras = \App\Models\Editora::orderBy('nome')->get();
 
+        return view('livewire.livros-table', [
+            'livros' => $livros,
+            'editoras' => $editoras,
+        ]);
+    }
 }

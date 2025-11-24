@@ -161,7 +161,7 @@
                                         <span class="label-text font-semibold">Imagem de Capa Atual</span>
                                     </label>
                                     <div class="flex items-center gap-4">
-                                        <img src="{{ $livro->imagem_capa }}" alt="{{ $livro->nome }}" class="h-32 rounded shadow-lg">
+                                        <img src="{{ asset('storage/' . $livro->imagem_capa) }}" alt="{{ $livro->nome }}" class="h-32 rounded shadow-lg">
                                         <div class="text-sm text-base-content/60">
                                             <p>Para alterar a imagem, selecione um novo ficheiro abaixo</p>
                                         </div>

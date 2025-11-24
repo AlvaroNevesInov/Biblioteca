@@ -3,13 +3,19 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Event;
 use Laravel\Fortify\Fortify;
 use Livewire\Livewire;
+use Illuminate\Auth\Events\Login;
+use App\Listeners\TriggerPopularBooksImport;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Registrar listener para importação de livros populares no login
+        Event::listen(Login::class, TriggerPopularBooksImport::class);
+
         // Personalização das views do Fortify (opcional)
         Fortify::loginView(function () {
             return view('auth.login');

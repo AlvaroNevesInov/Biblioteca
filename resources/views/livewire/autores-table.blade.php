@@ -44,7 +44,7 @@
                         <td class="px-6 py-4 whitespace-nowrap text-center">
                             <div class="flex justify-center">
                                 @if($autor->foto)
-                                    <img src="{{ $autor->foto }}" alt="{{ $autor->nome }}" class=" h-[50px] w-[50px] rounded-full object-cover ">
+                                    <img src="{{ asset('storage/' . $autor->foto) }}" alt="{{ $autor->nome }}" class=" h-[50px] w-[50px] rounded-full object-cover ">
                                 @else
                                     <div class="h-[50px] w-[50px] rounded-full bg-gray-200 flex items-center justify-center">
                                         <span class="text-gray-500 text-xs">Sem foto</span>

@@ -8,6 +8,7 @@ use App\Http\Controllers\LivroExportController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\CidadaoController;
+use App\Http\Controllers\GoogleBooksController;
 
 Route::get('/', function () {
     return view('home');
@@ -29,6 +30,18 @@ Route::middleware([
         // Rota de exportação ANTES do resource (importante!)
         Route::get('/livros/exportar-excel', [LivroExportController::class, 'exportarExcel'])
             ->name('livros.export.excel');
+
+        // Rotas de Google Books API (pesquisa e importação) - apenas admin
+        Route::prefix('google-books')->name('google-books.')->group(function () {
+            Route::get('/', [GoogleBooksController::class, 'index'])->name('index');
+            Route::get('/search', [GoogleBooksController::class, 'search'])->name('search');
+            Route::get('/isbn', [GoogleBooksController::class, 'searchByIsbn'])->name('search.isbn');
+            Route::get('/{volumeId}', [GoogleBooksController::class, 'show'])->name('show');
+            Route::post('/import', [GoogleBooksController::class, 'import'])->name('import');
+        });
+
+        // API endpoints para Google Books (para uso em autocomplete, etc)
+        Route::get('/api/google-books/search', [GoogleBooksController::class, 'apiSearch'])->name('api.google-books.search');
 
         // Rotas de Livros (criar, editar, eliminar)
         Route::resource('livros', LivroController::class)->except(['index', 'show']);
@@ -74,6 +87,10 @@ Route::middleware([
     // Listar editoras (todos podem ver)
     Route::get('/editoras', [EditoraController::class, 'index'])->name('editoras.index');
     Route::get('/editoras/{editora}', [EditoraController::class, 'show'])->name('editoras.show');
+
+    // Importar e requisitar livro da Google Books (todos podem fazer)
+    Route::post('/google-books/import-and-request', [GoogleBooksController::class, 'importAndRequest'])
+        ->name('google-books.import-and-request');
 
     // Rotas de Requisições (todos podem ver as suas e criar novas)
     Route::resource('requisicoes', RequisicaoController::class)

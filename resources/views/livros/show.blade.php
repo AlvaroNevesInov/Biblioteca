@@ -34,7 +34,7 @@
                         <div class="flex-shrink-0">
                             @if($livro->imagem_capa)
 
-                                <img src="{{ $livro->imagem_capa }}"
+                                <img src="{{ asset('storage/' . $livro->imagem_capa) }}"
 
                                      alt="{{ $livro->nome }}"
 
@@ -243,7 +243,7 @@
                                             <td>
                                                 @if($requisicao->foto_cidadao)
                                                     <div class="avatar">
-                                                        <div class="w-[50px] h rounded-full">
+                                                        <div class="w-[50px] rounded-full">
                                                             <img src="{{ $requisicao->foto_cidadao }}" alt="{{ $requisicao->user->name }}">
                                                         </div>
                                                     </div>

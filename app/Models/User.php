@@ -10,6 +10,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class User extends Authenticatable
 {
@@ -126,6 +127,21 @@ class User extends Authenticatable
 
         return $this->contarRequisicoesAtivas() < 3;
 
+    }
+
+    /**
+     * Get the URL to the user's profile photo.
+     * Sobrescreve o método do Jetstream para usar public/uploads em vez de storage
+     *
+     * @return \Illuminate\Database\Eloquent\Casts\Attribute
+     */
+    protected function profilePhotoUrl(): Attribute
+    {
+        return Attribute::get(function (): string {
+            return $this->profile_photo_path
+                    ? url($this->profile_photo_path)
+                    : $this->defaultProfilePhotoUrl();
+        });
     }
 
 

@@ -103,19 +103,21 @@ class RequisicaoController extends Controller
         $file->move($uploadPath, $filename);
         $fotoCidadao = '/uploads/requisicoes/' . $filename;
 
-        // Se o cidadão ainda não tem foto de perfil, copia a foto para o storage
+        // Se o cidadão ainda não tem foto de perfil, copia a foto para public/uploads/profile-photos
         if (!$user->profile_photo_path) {
-            // Copiar a foto para o storage/app/public/profile-photos
-            $sourceFile = $uploadPath . '/' . $filename;
-            $profilePhotoPath = 'profile-photos/' . $filename;
+            // Criar pasta de profile photos se não existir
+            $profilePhotosPath = public_path('uploads/profile-photos');
+            if (!file_exists($profilePhotosPath)) {
+                mkdir($profilePhotosPath, 0755, true);
+            }
 
-            Storage::disk('public')->put(
-                $profilePhotoPath,
-                file_get_contents($sourceFile)
-            );
+            // Copiar a foto para public/uploads/profile-photos
+            $sourceFile = $uploadPath . '/' . $filename;
+            $destFile = $profilePhotosPath . '/' . $filename;
+            copy($sourceFile, $destFile);
 
             $user->update([
-                'profile_photo_path' => $profilePhotoPath
+                'profile_photo_path' => '/uploads/profile-photos/' . $filename
             ]);
         }
 
