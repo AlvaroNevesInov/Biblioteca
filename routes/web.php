@@ -46,6 +46,12 @@ Route::middleware([
         // Rotas de Livros (criar, editar, eliminar)
         Route::resource('livros', LivroController::class)->except(['index', 'show']);
 
+        // Rotas para criar autor e editora inline durante criação de livro
+
+        Route::post('/livros/criar-editora', [LivroController::class, 'criarEditora'])->name('livros.criar-editora');
+
+        Route::post('/livros/criar-autor', [LivroController::class, 'criarAutor'])->name('livros.criar-autor');
+
         // Rotas de Autores (criar, editar, eliminar)
         Route::resource('autores', AutorController::class)->except(['index', 'show']);
 

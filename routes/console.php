@@ -10,3 +10,12 @@ Artisan::command('inspire', function () {
 
 // Agendar envio de reminders de devolução todos os dias às 9h
 Schedule::command('reminders:devolucao')->dailyAt('09:00');
+
+// Sincronizar livros ativos semanalmente aos domingos às 3h da manhã
+
+Schedule::command('sync:active-books --queue')
+
+    ->weekly()
+    ->sundays()
+    ->at('03:00')
+    ->withoutOverlapping();

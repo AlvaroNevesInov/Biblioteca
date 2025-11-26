@@ -40,6 +40,9 @@ class RequisicaoController extends Controller
         if ($request->has('livro_id')) {
             $livro = Livro::with(['editora', 'autores'])->findOrFail($request->livro_id);
 
+            // Registrar acesso para tracking de sincronização
+            $livro->touch('last_accessed_at');
+
             if (!$livro->estaDisponivel()) {
                 return redirect()->route('livros.index')
                     ->with('error', 'Este livro já está requisitado e não está disponível no momento.');
@@ -74,6 +77,9 @@ class RequisicaoController extends Controller
         }
 
         $livro = Livro::findOrFail($validated['livro_id']);
+
+        // Registrar acesso para tracking de sincronização (livro está sendo requisitado)
+        $livro->touch('last_accessed_at');
 
         if (!$livro->estaDisponivel()) {
             return redirect()->route('requisicoes.create')

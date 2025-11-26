@@ -16,6 +16,9 @@ class LivroController extends Controller
 
      public function show(Livro $livro)
     {
+        // Registrar acesso para tracking de sincronização
+        $livro->touch('last_accessed_at');
+
         $livro->load(['editora', 'autores', 'requisicoes.user']);
         // Separar requisições ativas e passadas
 
@@ -70,6 +73,9 @@ class LivroController extends Controller
 
     public function edit(Livro $livro)
     {
+        // Registrar acesso para tracking de sincronização
+        $livro->touch('last_accessed_at');
+
         $editoras = Editora::orderBy('nome')->get();
         $autores = Autor::orderBy('nome')->get();
         return view('livros.edit', compact('livro', 'editoras', 'autores'));
@@ -105,5 +111,33 @@ class LivroController extends Controller
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro excluído com sucesso!');
+    }
+
+    public function criarEditora(Request $request)
+    {
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255|unique:editoras,nome',
+        ]);
+
+        $editora = Editora::create($validated);
+
+        return response()->json([
+            'id' => $editora->id,
+            'nome' => $editora->nome,
+        ]);
+    }
+
+    public function criarAutor(Request $request)
+    {
+        $validated = $request->validate([
+            'nome' => 'required|string|max:255|unique:autores,nome',
+        ]);
+
+        $autor = Autor::create($validated);
+
+        return response()->json([
+            'id' => $autor->id,
+            'nome' => $autor->nome,
+        ]);
     }
 }

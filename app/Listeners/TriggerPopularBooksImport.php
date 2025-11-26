@@ -19,6 +19,9 @@ class TriggerPopularBooksImport
         $isImporting = Cache::get('popular_books_importing', false);
 
         if (!$alreadyImported && !$isImporting) {
+             // Marcar como "importing" ANTES de disparar o job para prevenir race condition
+
+            Cache::put('popular_books_importing', true, now()->addHour());
             Log::info('Disparando importação de livros populares após login', [
                 'user_id' => $event->user->id,
                 'user_email' => $event->user->email,

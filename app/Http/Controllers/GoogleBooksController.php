@@ -74,6 +74,11 @@ class GoogleBooksController extends Controller
         $existingBook = null;
         if ($book['isbn']) {
             $existingBook = Livro::where('isbn', $book['isbn'])->first();
+
+            // Se existir, registrar acesso para tracking
+            if ($existingBook) {
+                $existingBook->touch('last_accessed_at');
+            }
         }
 
         return view('google-books.show', [

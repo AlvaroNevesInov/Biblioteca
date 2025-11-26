@@ -23,6 +23,7 @@ class Livro extends Model
 
     protected $casts = [
         'preco' => 'decimal:2',
+        'last_accessed_at' => 'datetime',
     ];
 
     /**

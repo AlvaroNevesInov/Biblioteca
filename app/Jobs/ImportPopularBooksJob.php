@@ -35,7 +35,7 @@ class ImportPopularBooksJob implements ShouldQueue
         Cache::put('popular_books_importing', true, now()->addHour());
 
         $totalImported = 0;
-        $targetBooks = 1000;
+        $targetBooks = 200;
 
         // Categorias populares e autores famosos para pesquisar
         $searchQueries = [
@@ -124,8 +124,9 @@ class ImportPopularBooksJob implements ShouldQueue
             }
         }
 
-        // Marcar como completo
-        Cache::put('popular_books_imported', true, now()->addYears(10));
+        // Marcar como completo (cache expira em 90 dias para permitir re-sincronização)
+
+        Cache::put('popular_books_imported', true, now()->addDays(90));
         Cache::forget('popular_books_importing');
 
         Log::info("Importação concluída! Total de livros importados: {$totalImported}");
