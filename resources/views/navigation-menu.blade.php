@@ -19,6 +19,12 @@
                     <x-nav-link href="{{ route('requisicoes.index') }}" :active="request()->routeIs('requisicoes.*')">
                         {{ __('Requisições') }}
                     </x-nav-link>
+
+                    @if(auth()->user()->isAdmin())
+                        <x-nav-link href="{{ route('reviews.index') }}" :active="request()->routeIs('reviews.*')">
+                            {{ __('Reviews') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 

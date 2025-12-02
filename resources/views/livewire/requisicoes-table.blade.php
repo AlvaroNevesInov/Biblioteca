@@ -413,6 +413,108 @@
                                             </div>
                                         </dialog>
                                     @endif
+
+                                    @if($requisicao->isDevolvida() && !$requisicao->hasReview())
+                                        <button
+                                            onclick="document.getElementById('review-modal-{{ $requisicao->id }}').showModal()"
+                                            class="btn btn-xs btn-primary gap-1"
+                                            title="Deixar Review"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                            </svg>
+                                            Review
+                                        </button>
+
+                                        <!-- Modal de Review -->
+                                        <dialog id="review-modal-{{ $requisicao->id }}" class="modal">
+                                            <div class="modal-box">
+                                                <h3 class="font-bold text-lg">Deixar Review - {{ $requisicao->livro->nome }}</h3>
+                                                <form action="{{ route('reviews.store') }}" method="POST" class="py-4">
+                                                    @csrf
+                                                    <input type="hidden" name="requisicao_id" value="{{ $requisicao->id }}">
+                                                    <div class="form-control">
+                                                        <label class="label">
+                                                            <span class="label-text">O seu comentário *</span>
+                                                        </label>
+                                                        <textarea
+                                                            name="comentario"
+                                                            class="textarea textarea-bordered h-32"
+                                                            placeholder="Partilhe a sua opinião sobre este livro..."
+                                                            required
+                                                            minlength="10"
+                                                            maxlength="1000"
+                                                        ></textarea>
+                                                        <label class="label">
+                                                            <span class="label-text-alt">Mínimo 10 caracteres, máximo 1000</span>
+                                                        </label>
+                                                    </div>
+                                                    <div class="alert alert-info mt-4">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                        <span class="text-sm">O seu review será analisado por um administrador antes de ser publicado.</span>
+                                                    </div>
+                                                    <div class="modal-action">
+                                                        <button type="button" class="btn" onclick="document.getElementById('review-modal-{{ $requisicao->id }}').close()">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary">Submeter Review</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </dialog>
+                                    @endif
+
+                                    @if($requisicao->review)
+                                        <button
+                                            onclick="document.getElementById('review-status-modal-{{ $requisicao->id }}').showModal()"
+                                            class="btn btn-xs btn-ghost gap-1"
+                                            title="Ver Review"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                                            </svg>
+                                            @if($requisicao->review->isSuspenso())
+                                                <span class="badge badge-warning badge-xs">Suspenso</span>
+                                            @elseif($requisicao->review->isAtivo())
+                                                <span class="badge badge-success badge-xs">Ativo</span>
+                                            @else
+                                                <span class="badge badge-error badge-xs">Recusado</span>
+                                            @endif
+                                        </button>
+
+                                        <!-- Modal de Status do Review -->
+                                        <dialog id="review-status-modal-{{ $requisicao->id }}" class="modal">
+                                            <div class="modal-box">
+                                                <h3 class="font-bold text-lg">O seu Review</h3>
+                                                <div class="py-4 space-y-3">
+                                                    <div>
+                                                        <p class="text-sm text-gray-600 mb-1">Estado:</p>
+                                                        @if($requisicao->review->isSuspenso())
+                                                            <span class="badge badge-warning">Aguardando Aprovação</span>
+                                                        @elseif($requisicao->review->isAtivo())
+                                                            <span class="badge badge-success">Aprovado e Publicado</span>
+                                                        @else
+                                                            <span class="badge badge-error">Recusado</span>
+                                                        @endif
+                                                    </div>
+                                                    <div>
+                                                        <p class="text-sm text-gray-600 mb-1">O seu comentário:</p>
+                                                        <p class="whitespace-pre-wrap bg-base-200 p-3 rounded">{{ $requisicao->review->comentario }}</p>
+                                                    </div>
+                                                    @if($requisicao->review->isRecusado() && $requisicao->review->justificacao_recusa)
+                                                        <div class="alert alert-error">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                            <div>
+                                                                <p class="font-semibold">Motivo da recusa:</p>
+                                                                <p class="text-sm">{{ $requisicao->review->justificacao_recusa }}</p>
+                                                            </div>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <div class="modal-action">
+                                                    <button class="btn" onclick="document.getElementById('review-status-modal-{{ $requisicao->id }}').close()">Fechar</button>
+                                                </div>
+                                            </div>
+                                        </dialog>
+                                    @endif
                                 @endif
                             </div>
                         </td>

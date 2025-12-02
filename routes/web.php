@@ -9,6 +9,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\CidadaoController;
 use App\Http\Controllers\GoogleBooksController;
+use App\Http\Controllers\ReviewController;
 
 Route::get('/', function () {
     return view('home');
@@ -76,6 +77,13 @@ Route::middleware([
 
         Route::get('/cidadaos', [CidadaoController::class, 'index'])->name('cidadaos.index');
         Route::get('/cidadaos/{cidadao}', [CidadaoController::class, 'show'])->name('cidadaos.show');
+
+        // Rotas de Reviews - Gestão Admin
+        Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+        Route::get('/reviews/{review}', [ReviewController::class, 'show'])->name('reviews.show');
+        Route::post('/reviews/{review}/aprovar', [ReviewController::class, 'aprovar'])->name('reviews.aprovar');
+        Route::post('/reviews/{review}/recusar', [ReviewController::class, 'recusar'])->name('reviews.recusar');
+        Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
     });
 
     // =========================================
@@ -103,4 +111,7 @@ Route::middleware([
 
         ->except(['show'])
         ->parameters(['requisicoes' => 'requisicao']);
+
+    // Rotas de Reviews - Cidadãos podem criar reviews
+    Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
 });

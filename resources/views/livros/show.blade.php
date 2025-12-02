@@ -285,6 +285,60 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Reviews Ativos -->
+            <div class="bg-base-100 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                        </svg>
+                        Reviews
+                    </h3>
+
+                    @php
+                        $reviewsAtivos = $livro->reviewsAtivos()->get();
+                    @endphp
+
+                    @if($reviewsAtivos->count() > 0)
+                        <div class="space-y-4">
+                            @foreach($reviewsAtivos as $review)
+                                <div class="bg-base-200 rounded-lg p-4">
+                                    <div class="flex items-start gap-4">
+                                        <div class="avatar">
+                                            <div class="w-12 rounded-full">
+                                                @if($review->user->profile_photo_path)
+                                                    <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->name }}">
+                                                @else
+                                                    <div class="w-12 h-12 rounded-full bg-primary text-primary-content flex items-center justify-center font-bold">
+                                                        {{ substr($review->user->name, 0, 1) }}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center justify-between mb-2">
+                                                <div>
+                                                    <p class="font-semibold text-base-content">{{ $review->user->name }}</p>
+                                                    <p class="text-sm text-base-content/70">{{ $review->created_at->format('d/m/Y') }}</p>
+                                                </div>
+                                            </div>
+                                            <p class="text-base-content whitespace-pre-wrap">{{ $review->comentario }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <div class="text-center py-8 text-base-content/70">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                            </svg>
+                            <p>Não existem reviews para este livro ainda.</p>
+                        </div>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </x-app-layout>

@@ -52,6 +52,22 @@ class Livro extends Model
     }
 
     /**
+     * Um livro pode ter muitos reviews
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Obter reviews ativos do livro
+     */
+    public function reviewsAtivos()
+    {
+        return $this->reviews()->where('estado', 'ativo')->with('user')->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Verificar se o livro está disponível para requisição
      */
     public function estaDisponivel(): bool

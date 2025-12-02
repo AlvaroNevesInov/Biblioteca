@@ -99,7 +99,13 @@ class User extends Authenticatable
 
     }
 
-
+    /**
+         * Um utilizador tem muitos reviews
+         */
+        public function reviews(): HasMany
+        {
+            return $this->hasMany(Review::class);
+        }
 
     /**
 

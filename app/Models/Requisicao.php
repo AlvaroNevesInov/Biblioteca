@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Requisicao extends Model
 {
@@ -51,14 +52,37 @@ class Requisicao extends Model
     }
 
     /**
-
      * Admin que confirmou a recepção do livro
-
      */
 
     public function recebidoPor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'recebido_por');
+    }
+
+    /**
+     * Uma requisição pode ter um review
+     */
+    public function review(): HasOne
+    {
+        return $this->hasOne(Review::class);
+    }
+
+    /**
+     * Verificar se a requisição tem review
+     */
+    public function hasReview(): bool
+    {
+        return $this->review()->exists();
+    }
+
+    /**
+     * Verificar se a requisição pode receber review
+     * Apenas requisições devolvidas podem ter review
+     */
+    public function podeReceberReview(): bool
+    {
+        return $this->isDevolvida() && !$this->hasReview();
     }
 
     /**
