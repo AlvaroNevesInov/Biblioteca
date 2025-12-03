@@ -36,7 +36,10 @@ class LivroController extends Controller
             ->recentes()
             ->get();
 
-        return view('livros.show', compact('livro', 'requisicoesAtivas', 'requisicoesPast'));
+        // Obter livros relacionados usando inteligência artificial de texto
+        $livrosRelacionados = $livro->livrosRelacionados(5);
+
+        return view('livros.show', compact('livro', 'requisicoesAtivas', 'requisicoesPast', 'livrosRelacionados'));
 
     }
 

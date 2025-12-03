@@ -339,6 +339,65 @@
                     @endif
                 </div>
             </div>
+
+            <!-- Livros Relacionados -->
+            @if($livrosRelacionados->count() > 0)
+            <div class="bg-base-100 overflow-hidden shadow-xl sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-base-content mb-4 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        Livros Relacionados
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @foreach($livrosRelacionados as $livroRelacionado)
+                            <a href="{{ route('livros.show', $livroRelacionado) }}" class="card bg-base-200 hover:bg-base-300 transition-all duration-200 hover:shadow-lg">
+                                <div class="card-body p-4">
+                                    <div class="flex gap-3">
+                                        <div class="flex-shrink-0">
+                                            @if($livroRelacionado->imagem_capa)
+                                                <img src="{{ asset('storage/' . $livroRelacionado->imagem_capa) }}"
+                                                     alt="{{ $livroRelacionado->nome }}"
+                                                     class="w-16 h-20 object-cover rounded shadow">
+                                            @else
+                                                <div class="w-16 h-20 bg-base-300 rounded flex items-center justify-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                    </svg>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h4 class="font-semibold text-base-content text-sm line-clamp-2 mb-1">
+                                                {{ $livroRelacionado->nome }}
+                                            </h4>
+                                            <p class="text-xs text-base-content/70 line-clamp-1 mb-1">
+                                                {{ $livroRelacionado->autores->pluck('nome')->join(', ') }}
+                                            </p>
+                                            <p class="text-xs text-base-content/60 line-clamp-1">
+                                                {{ $livroRelacionado->editora->nome }}
+                                            </p>
+                                            @if(isset($livroRelacionado->similaridade))
+                                                <div class="mt-2">
+                                                    <div class="flex items-center gap-1">
+                                                        <div class="w-full bg-base-300 rounded-full h-1.5">
+                                                            <div class="bg-primary h-1.5 rounded-full" style="width: {{ $livroRelacionado->similaridade * 100 }}%"></div>
+                                                        </div>
+                                                        <span class="text-xs text-base-content/70 whitespace-nowrap">{{ number_format($livroRelacionado->similaridade * 100, 0) }}%</span>
+                                                    </div>
+                                                </div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </x-app-layout>
