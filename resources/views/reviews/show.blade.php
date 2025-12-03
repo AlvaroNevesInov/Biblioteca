@@ -62,7 +62,7 @@
                             <h4 class="text-lg font-semibold text-base-content mb-3">Cidadão</h4>
                             <div class="flex items-center gap-4 p-4 bg-base-200 rounded-lg">
                                 <div class="avatar">
-                                    <div class="w-12 rounded-full">
+                                    <div class="w-[50px] rounded-full">
                                         @if($review->user->profile_photo_path)
                                             <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->name }}">
                                         @else

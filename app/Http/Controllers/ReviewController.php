@@ -56,12 +56,12 @@ class ReviewController extends Controller
         // Carregar relações para os emails
         $review->load(['livro', 'user', 'requisicao']);
 
-        // Enviar email para todos os administradores
+        // Enviar email para todos os administradores com delays maiores
         $admins = User::where('role', 'admin')->get();
 
         foreach ($admins as $index => $admin) {
             Mail::to($admin->email)
-                ->later(now()->addSeconds(5 + ($index * 10)), new NovoReviewAdmin($review));
+                ->later(now()->addSeconds(10 + ($index * 20)), new NovoReviewAdmin($review));
         }
 
         return redirect()->route('requisicoes.index')
@@ -94,9 +94,9 @@ class ReviewController extends Controller
             'justificacao_recusa' => null,
         ]);
 
-        // Enviar email ao cidadão
+        // Enviar email ao cidadão com delay maior
         Mail::to($review->user->email)
-            ->later(now()->addSeconds(5), new StatusReviewCidadao($review));
+            ->later(now()->addSeconds(15), new StatusReviewCidadao($review));
 
         return redirect()->route('reviews.index')
             ->with('success', 'Review aprovado com sucesso!');
@@ -121,9 +121,9 @@ class ReviewController extends Controller
             'justificacao_recusa' => $validated['justificacao_recusa'],
         ]);
 
-        // Enviar email ao cidadão
+        // Enviar email ao cidadão com delay maior
         Mail::to($review->user->email)
-            ->later(now()->addSeconds(5), new StatusReviewCidadao($review));
+            ->later(now()->addSeconds(15), new StatusReviewCidadao($review));
 
         return redirect()->route('reviews.index')
             ->with('success', 'Review recusado com sucesso!');

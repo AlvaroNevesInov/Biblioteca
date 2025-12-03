@@ -32,5 +32,6 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('users-table', \App\Http\Livewire\UsersTable::class);
         Livewire::component('requisicoes-table', \App\Http\Livewire\RequisicoesTable::class);
         Livewire::component('cidadaos-table', \App\Http\Livewire\CidadaosTable::class);
+        Livewire::component('reviews-table', \App\Http\Livewire\ReviewsTable::class);
     }
 }

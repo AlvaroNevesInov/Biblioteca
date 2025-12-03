@@ -306,7 +306,7 @@
                                 <div class="bg-base-200 rounded-lg p-4">
                                     <div class="flex items-start gap-4">
                                         <div class="avatar">
-                                            <div class="w-12 rounded-full">
+                                            <div class="w-[50px] rounded-full">
                                                 @if($review->user->profile_photo_path)
                                                     <img src="{{ $review->user->profile_photo_url }}" alt="{{ $review->user->name }}">
                                                 @else
