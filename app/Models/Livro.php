@@ -68,6 +68,14 @@ class Livro extends Model
     }
 
     /**
+     * Um livro pode ter muitos alertas de disponibilidade
+     */
+    public function availabilityAlerts(): HasMany
+    {
+        return $this->hasMany(AvailabilityAlert::class);
+    }
+
+    /**
      * Verificar se o livro está disponível para requisição
      */
     public function estaDisponivel(): bool

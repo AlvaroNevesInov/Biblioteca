@@ -86,53 +86,44 @@ class User extends Authenticatable
     }
 
      /**
-
      * Um utilizador tem muitas requisições
-
      */
 
     public function requisicoes(): HasMany
-
     {
-
         return $this->hasMany(Requisicao::class);
-
     }
 
     /**
-         * Um utilizador tem muitos reviews
-         */
-        public function reviews(): HasMany
-        {
-            return $this->hasMany(Review::class);
-        }
+     * Um utilizador tem muitos reviews
+     */
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(Review::class);
+    }
 
     /**
+     * Um utilizador pode ter muitos alertas de disponibilidade
+     */
+    public function availabilityAlerts(): HasMany
+    {
+        return $this->hasMany(AvailabilityAlert::class);
+    }
 
+    /**
      * Contar requisições ativas do utilizador
-
      */
-
     public function contarRequisicoesAtivas(): int
-
     {
-
         return $this->requisicoes()->whereIn('estado', ['pendente', 'aprovada'])->count();
-
     }
 
     /**
-
      * Verificar se o utilizador pode requisitar mais livros (máximo 3)
-
      */
-
     public function podeRequisitar(): bool
-
     {
-
         return $this->contarRequisicoesAtivas() < 3;
-
     }
 
     /**

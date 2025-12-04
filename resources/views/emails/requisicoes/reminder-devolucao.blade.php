@@ -84,7 +84,7 @@
 
             <div style="text-align: center; margin: 30px 0;">
 
-                <a href="{{ route('requisicoes.index') }}"
+                <a href="{{ url('/requisicoes') }}"
                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 
                         color: white;

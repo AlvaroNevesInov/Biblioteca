@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Requisicao;
 use App\Models\Livro;
 use App\Models\User;
+use App\Models\AvailabilityAlert;
 use App\Mail\NovaRequisicaoAdmin;
 use App\Mail\NovaRequisicaoCidadao;
+use App\Mail\LivroDisponivel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -290,6 +292,9 @@ class RequisicaoController extends Controller
             $mensagem .= " (Atraso de {$diasAtraso} dias)";
         }
 
+        // Notificar cidadãos interessados no livro
+        $this->notificarInteressados($requisicao->livro);
+
         return redirect()->route('requisicoes.index')
             ->with('success', $mensagem);
     }
@@ -314,5 +319,39 @@ class RequisicaoController extends Controller
 
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição cancelada com sucesso!');
+    }
+
+    /**
+     * Notificar cidadãos interessados quando o livro fica disponível.
+     */
+    private function notificarInteressados(Livro $livro)
+    {
+        // Verificar se o livro está realmente disponível
+        if (!$livro->estaDisponivel()) {
+            return;
+        }
+
+        // Buscar alertas não notificados para este livro
+        $alertas = AvailabilityAlert::where('livro_id', $livro->id)
+            ->where('notificado', false)
+            ->with('user')
+            ->get();
+
+        if ($alertas->isEmpty()) {
+            return;
+        }
+
+        // Enviar email para cada cidadão interessado
+        $delay = 0;
+        foreach ($alertas as $alerta) {
+            Mail::to($alerta->user->email)
+                ->later(now()->addSeconds($delay), new LivroDisponivel($livro, $alerta->user));
+
+            // Marcar como notificado
+            $alerta->marcarComoNotificado();
+
+            // Incrementar delay para evitar rate limit (5 segundos entre cada email)
+            $delay += 5;
+        }
     }
 }

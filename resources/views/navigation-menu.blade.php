@@ -20,6 +20,10 @@
                         {{ __('Requisições') }}
                     </x-nav-link>
 
+                    <x-nav-link href="{{ route('availability-alerts.index') }}" :active="request()->routeIs('availability-alerts.*')">
+                        {{ __('Alertas') }}
+                    </x-nav-link>
+
                     @if(auth()->user()->isAdmin())
                         <x-nav-link href="{{ route('reviews.index') }}" :active="request()->routeIs('reviews.*')">
                             {{ __('Reviews') }}
@@ -170,6 +174,10 @@
 
             <x-responsive-nav-link href="{{ route('requisicoes.index') }}" :active="request()->routeIs('requisicoes.*')">
                 {{ __('Requisições') }}
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link href="{{ route('availability-alerts.index') }}" :active="request()->routeIs('availability-alerts.*')">
+                {{ __('Alertas') }}
             </x-responsive-nav-link>
         </div>
 

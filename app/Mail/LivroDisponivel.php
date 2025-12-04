@@ -2,7 +2,8 @@
 
 namespace App\Mail;
 
-use App\Models\Review;
+use App\Models\Livro;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -10,18 +11,27 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NovoReviewAdmin extends Mailable implements ShouldQueue
+class LivroDisponivel extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
     /**
+     * O livro que ficou disponível.
+     */
+    public Livro $livro;
+
+    /**
+     * O utilizador a ser notificado.
+     */
+    public User $user;
+
+    /**
      * Create a new message instance.
      */
-    public function __construct(
-        public Review $review
-    )
+    public function __construct(Livro $livro, User $user)
     {
-        //
+        $this->livro = $livro;
+        $this->user = $user;
     }
 
     /**
@@ -30,7 +40,7 @@ class NovoReviewAdmin extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Novo Review Submetido - ' . $this->review->livro->nome,
+            subject: 'Livro Disponível - ' . $this->livro->nome,
         );
     }
 
@@ -40,12 +50,10 @@ class NovoReviewAdmin extends Mailable implements ShouldQueue
     public function content(): Content
     {
         return new Content(
-            markdown: 'emails.reviews.novo-admin',
+            markdown: 'emails.availability-alerts.livro-disponivel',
             with: [
-                'review' => $this->review,
-                'livro' => $this->review->livro,
-                'cidadao' => $this->review->user,
-                'url' => url('/reviews/' . $this->review->id),
+                'livro' => $this->livro,
+                'user' => $this->user,
             ],
         );
     }

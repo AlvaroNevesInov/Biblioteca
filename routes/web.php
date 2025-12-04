@@ -10,6 +10,7 @@ use App\Http\Controllers\RequisicaoController;
 use App\Http\Controllers\CidadaoController;
 use App\Http\Controllers\GoogleBooksController;
 use App\Http\Controllers\ReviewController;
+use App\Http\Controllers\AvailabilityAlertController;
 
 Route::get('/', function () {
     return view('home');
@@ -114,4 +115,11 @@ Route::middleware([
 
     // Rotas de Reviews - Cidadãos podem criar reviews
     Route::post('/reviews', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Rotas de Alertas de Disponibilidade (todos podem criar e gerir os seus alertas)
+    Route::prefix('availability-alerts')->name('availability-alerts.')->group(function () {
+        Route::get('/', [AvailabilityAlertController::class, 'index'])->name('index');
+        Route::post('/', [AvailabilityAlertController::class, 'store'])->name('store');
+        Route::delete('/', [AvailabilityAlertController::class, 'destroy'])->name('destroy');
+    });
 });

@@ -38,10 +38,10 @@ Foi criada uma nova requisicao que aguarda a sua aprovacao.
 @if($livro->imagem_capa)
 ## Capa do Livro
 
-<img src="{{ asset($livro->imagem_capa) }}" alt="Capa do livro {{ $livro->nome }}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+<img src="{{ url('storage/' . $livro->imagem_capa) }}" alt="Capa do livro {{ $livro->nome }}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
 @endif
 
-<x-mail::button :url="route('requisicoes.index')">
+<x-mail::button :url="url('/requisicoes')">
 Ver Requisicoes
 </x-mail::button>
 
