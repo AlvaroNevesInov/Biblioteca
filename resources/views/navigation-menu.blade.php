@@ -1,3 +1,7 @@
+@php
+    /** @var \App\Models\User $user */
+    $user = auth()->user();
+@endphp
 <nav x-data="{ open: false }" class="bg-base-100 border-b border-base-300">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -24,7 +28,7 @@
                         {{ __('Alertas') }}
                     </x-nav-link>
 
-                    @if(auth()->user()->isAdmin())
+                    @if($user->isAdmin())
                         <x-nav-link href="{{ route('reviews.index') }}" :active="request()->routeIs('reviews.*')">
                             {{ __('Reviews') }}
                         </x-nav-link>
@@ -33,6 +37,26 @@
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6 gap-4">
+                <!-- Carrinho de Compras -->
+                <a href="{{ route('carrinho.index') }}" class="btn btn-ghost btn-circle hover:bg-base-300 indicator">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    @php
+                        $carrinhoCount = $user->carrinhoItems()->count();
+                    @endphp
+                    @if($carrinhoCount > 0)
+                        <span class="badge badge-sm badge-primary indicator-item">{{ $carrinhoCount }}</span>
+                    @endif
+                </a>
+
+                <!-- Encomendas -->
+                <a href="{{ route('encomendas.index') }}" class="btn btn-ghost btn-circle hover:bg-base-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                </a>
+
                 <!-- Theme Toggle -->
                 <label class="swap swap-rotate btn btn-ghost btn-circle hover:bg-base-300">
                     <!-- Input ESCONDIDO -->
@@ -56,7 +80,7 @@
                             <x-slot name="trigger">
                                 <span class="inline-flex rounded-md">
                                     <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-base-content bg-base-100 hover:text-base-content focus:outline-none focus:bg-base-200 active:bg-base-200 transition ease-in-out duration-150">
-                                        {{ Auth::user()->currentTeam->name }}
+                                        {{ $user->currentTeam->name }}
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
                                         </svg>
@@ -72,7 +96,7 @@
                                     </div>
 
                                     <!-- Team Settings -->
-                                    <x-dropdown-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}">
+                                    <x-dropdown-link href="{{ route('teams.show', $user->currentTeam->id) }}">
                                         {{ __('Team Settings') }}
                                     </x-dropdown-link>
 
@@ -83,14 +107,14 @@
                                     @endcan
 
                                     <!-- Team Switcher -->
-                                    @if (Auth::user()->allTeams()->count() > 1)
+                                    @if ($user->allTeams()->count() > 1)
                                         <div class="border-t border-base-300"></div>
 
                                         <div class="block px-4 py-2 text-xs text-base-content/60">
                                             {{ __('Switch Teams') }}
                                         </div>
 
-                                        @foreach (Auth::user()->allTeams() as $team)
+                                        @foreach ($user->allTeams() as $team)
                                             <x-switchable-team :team="$team" />
                                         @endforeach
                                     @endif
@@ -106,12 +130,12 @@
                         <x-slot name="trigger">
                             @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                                 <button class="flex text-sm border-2 border-transparent rounded-full focus:outline-none focus:border-base-300 transition">
-                                    <img class="size-8 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                                    <img class="size-8 rounded-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" />
                                 </button>
                             @else
                                 <span class="inline-flex rounded-md">
                                     <button type="button" class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-base-content bg-base-100 hover:text-base-content focus:outline-none focus:bg-base-200 active:bg-base-200 transition ease-in-out duration-150">
-                                        {{ Auth::user()->name }}
+                                        {{ $user->name }}
 
                                         <svg class="ms-2 -me-0.5 size-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -200,13 +224,13 @@
             <div class="flex items-center px-4">
                 @if (Laravel\Jetstream\Jetstream::managesProfilePhotos())
                     <div class="shrink-0 me-3">
-                        <img class="size-10 rounded-full object-cover" src="{{ Auth::user()->profile_photo_url }}" alt="{{ Auth::user()->name }}" />
+                        <img class="size-10 rounded-full object-cover" src="{{ $user->profile_photo_url }}" alt="{{ $user->name }}" />
                     </div>
                 @endif
 
                 <div>
-                    <div class="font-medium text-base text-base-content">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-base-content/60">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-base-content">{{ $user->name }}</div>
+                    <div class="font-medium text-sm text-base-content/60">{{ $user->email }}</div>
                 </div>
             </div>
 
@@ -241,7 +265,7 @@
                     </div>
 
                     <!-- Team Settings -->
-                    <x-responsive-nav-link href="{{ route('teams.show', Auth::user()->currentTeam->id) }}" :active="request()->routeIs('teams.show')">
+                    <x-responsive-nav-link href="{{ route('teams.show', $user->currentTeam->id) }}" :active="request()->routeIs('teams.show')">
                         {{ __('Team Settings') }}
                     </x-responsive-nav-link>
 
@@ -252,14 +276,14 @@
                     @endcan
 
                     <!-- Team Switcher -->
-                    @if (Auth::user()->allTeams()->count() > 1)
+                    @if ($user->allTeams()->count() > 1)
                         <div class="border-t border-base-300"></div>
 
                         <div class="block px-4 py-2 text-xs text-base-content/60">
                             {{ __('Switch Teams') }}
                         </div>
 
-                        @foreach (Auth::user()->allTeams() as $team)
+                        @foreach ($user->allTeams() as $team)
                             <x-switchable-team :team="$team" component="responsive-nav-link" />
                         @endforeach>
                     @endif

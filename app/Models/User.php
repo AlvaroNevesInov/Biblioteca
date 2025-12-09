@@ -11,6 +11,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 
 class User extends Authenticatable
 {
@@ -108,6 +109,22 @@ class User extends Authenticatable
     public function availabilityAlerts(): HasMany
     {
         return $this->hasMany(AvailabilityAlert::class);
+    }
+
+    /**
+     * Um utilizador tem muitos itens no carrinho
+     */
+    public function carrinhoItems(): HasMany
+    {
+        return $this->hasMany(CarrinhoItem::class);
+    }
+
+    /**
+     * Um utilizador tem muitas encomendas
+     */
+    public function encomendas(): HasMany
+    {
+        return $this->hasMany(Encomenda::class);
     }
 
     /**

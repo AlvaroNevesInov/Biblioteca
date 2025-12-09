@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Collection;
+
 
 class Livro extends Model
 {
@@ -73,6 +75,22 @@ class Livro extends Model
     public function availabilityAlerts(): HasMany
     {
         return $this->hasMany(AvailabilityAlert::class);
+    }
+
+    /**
+     * Um livro pode estar em muitos carrinhos
+     */
+    public function carrinhoItems(): HasMany
+    {
+        return $this->hasMany(CarrinhoItem::class);
+    }
+
+    /**
+     * Um livro pode estar em muitos itens de encomenda
+     */
+    public function encomendaItems(): HasMany
+    {
+        return $this->hasMany(EncomendaItem::class);
     }
 
     /**

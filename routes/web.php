@@ -11,6 +11,9 @@ use App\Http\Controllers\CidadaoController;
 use App\Http\Controllers\GoogleBooksController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\AvailabilityAlertController;
+use App\Http\Controllers\CarrinhoController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\EncomendaController;
 
 Route::get('/', function () {
     return view('home');
@@ -121,5 +124,40 @@ Route::middleware([
         Route::get('/', [AvailabilityAlertController::class, 'index'])->name('index');
         Route::post('/', [AvailabilityAlertController::class, 'store'])->name('store');
         Route::delete('/', [AvailabilityAlertController::class, 'destroy'])->name('destroy');
+    });
+
+    // =========================================
+    // ROTAS DO CARRINHO DE COMPRAS
+    // =========================================
+    Route::prefix('carrinho')->name('carrinho.')->group(function () {
+        Route::get('/', [CarrinhoController::class, 'index'])->name('index');
+        Route::post('/', [CarrinhoController::class, 'store'])->name('store');
+        Route::put('/{carrinhoItem}', [CarrinhoController::class, 'update'])->name('update');
+        Route::delete('/{carrinhoItem}', [CarrinhoController::class, 'destroy'])->name('destroy');
+        Route::delete('/', [CarrinhoController::class, 'clear'])->name('clear');
+    });
+
+    // =========================================
+    // ROTAS DE CHECKOUT
+    // =========================================
+    Route::prefix('checkout')->name('checkout.')->group(function () {
+        Route::get('/shipping', [CheckoutController::class, 'showShipping'])->name('shipping');
+        Route::post('/shipping', [CheckoutController::class, 'processShipping'])->name('shipping.process');
+        Route::get('/payment', [CheckoutController::class, 'showPayment'])->name('payment');
+        Route::post('/payment', [CheckoutController::class, 'processPayment'])->name('payment.process');
+        Route::get('/success/{encomenda}', [CheckoutController::class, 'success'])->name('success');
+    });
+
+    // =========================================
+    // ROTAS DE ENCOMENDAS
+    // =========================================
+    Route::prefix('encomendas')->name('encomendas.')->group(function () {
+        Route::get('/', [EncomendaController::class, 'index'])->name('index');
+        Route::get('/{encomenda}', [EncomendaController::class, 'show'])->name('show');
+
+        // Apenas admin pode atualizar o estado
+        Route::middleware(['admin'])->group(function () {
+            Route::patch('/{encomenda}/status', [EncomendaController::class, 'updateStatus'])->name('updateStatus');
+        });
     });
 });
