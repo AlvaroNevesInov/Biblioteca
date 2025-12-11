@@ -9,11 +9,13 @@ class CarrinhoItem extends Model
     protected $fillable = [
         'user_id',
         'livro_id',
-        'quantidade'
+        'quantidade',
+        'abandoned_cart_email_sent_at'
     ];
 
     protected $casts = [
         'quantidade' => 'integer',
+        'abandoned_cart_email_sent_at' => 'datetime',
     ];
 
     public function user()

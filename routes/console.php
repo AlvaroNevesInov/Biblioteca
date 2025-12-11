@@ -19,3 +19,6 @@ Schedule::command('sync:active-books --queue')
     ->sundays()
     ->at('03:00')
     ->withoutOverlapping();
+
+// Enviar emails de carrinho abandonado a cada hora
+Schedule::command('carrinho:enviar-emails-abandonados')->hourly();
