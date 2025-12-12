@@ -143,7 +143,6 @@ Route::middleware([
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/shipping', [CheckoutController::class, 'showShipping'])->name('shipping');
         Route::post('/shipping', [CheckoutController::class, 'processShipping'])->name('shipping.process');
-        Route::post('/create-pending', [CheckoutController::class, 'createPendingOrder'])->name('create-pending');
 
         // Stripe Checkout Session callbacks
         Route::get('/stripe/success', [CheckoutController::class, 'stripeSuccess'])->name('stripe.success');
@@ -160,8 +159,8 @@ Route::middleware([
         Route::get('/{encomenda}', [EncomendaController::class, 'show'])->name('show');
 
         // Pagamento de encomenda pendente
-        Route::get('/{encomenda}/pagar', [EncomendaController::class, 'showPayment'])->name('payment');
-        Route::post('/{encomenda}/pagar', [EncomendaController::class, 'processPayment'])->name('payment.process');
+        Route::post('/{encomenda}/pagar', [EncomendaController::class, 'payPendingOrder'])->name('pay');
+        Route::get('/{encomenda}/stripe/success', [EncomendaController::class, 'stripeSuccess'])->name('stripe.success');
 
         // Apenas admin pode atualizar o estado
         Route::middleware(['admin'])->group(function () {

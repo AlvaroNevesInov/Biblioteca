@@ -145,21 +145,19 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="payment_action" id="payment_action" value="">
-
                         <!-- Botões -->
                         <div class="card-actions justify-between mt-6">
                             <a href="{{ route('carrinho.index') }}" class="btn btn-ghost">
                                 Voltar ao Carrinho
                             </a>
                             <div class="flex gap-3">
-                                <button type="button" onclick="payLater()" class="btn btn-outline">
+                                <button type="submit" name="payment_action" value="pay_later" class="btn btn-outline">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                     Pagar Depois
                                 </button>
-                                <button type="button" onclick="payNow()" class="btn btn-primary">
+                                <button type="submit" name="payment_action" value="pay_now" class="btn btn-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                     </svg>
@@ -172,29 +170,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        const form = document.querySelector('form');
-        const paymentAction = document.getElementById('payment_action');
-
-        function payNow() {
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            paymentAction.value = 'pay_now';
-            form.action = '{{ route('checkout.shipping.process') }}';
-            form.submit();
-        }
-
-        function payLater() {
-            if (!form.checkValidity()) {
-                form.reportValidity();
-                return;
-            }
-            paymentAction.value = 'pay_later';
-            form.action = '{{ route('checkout.create-pending') }}';
-            form.submit();
-        }
-    </script>
 </x-app-layout>

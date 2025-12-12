@@ -20,6 +20,16 @@
                 </div>
             @endif
 
+            @if($encomendasPendentesCount > 0 && !auth()->user()->isAdmin())
+                <div class="alert alert-warning mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                    <div>
+                        <h3 class="font-bold">Tem {{ $encomendasPendentesCount }} {{ $encomendasPendentesCount === 1 ? 'encomenda pendente' : 'encomendas pendentes' }} de pagamento</h3>
+                        <div class="text-xs">Clique no botão "Pagar" para efetuar o pagamento das suas encomendas.</div>
+                    </div>
+                </div>
+            @endif
+
             @if($encomendas->isEmpty())
                 <div class="card bg-base-100 shadow-xl">
                     <div class="card-body text-center">
@@ -81,9 +91,30 @@
                                                 <span class="badge {{ $badgeClass }}">{{ ucfirst($encomenda->estado) }}</span>
                                             </td>
                                             <td class="text-right">
-                                                <a href="{{ route('encomendas.show', $encomenda) }}" class="btn btn-sm btn-ghost">
-                                                    Ver Detalhes
-                                                </a>
+                                                <div class="flex gap-2 justify-end">
+                                                    @if($encomenda->isPendente() && !auth()->user()->isAdmin())
+                                                       <form method="POST" action="{{ route('encomendas.pay', $encomenda) }}" class="inline">
+
+                                                            @csrf
+
+                                                            <button type="submit" class="btn btn-sm btn-success">
+
+                                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+
+                                                                </svg>
+
+                                                                Pagar
+
+                                                            </button>
+
+                                                        </form>
+                                                    @endif
+                                                    <a href="{{ route('encomendas.show', $encomenda) }}" class="btn btn-sm btn-ghost">
+                                                        Ver Detalhes
+                                                    </a>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

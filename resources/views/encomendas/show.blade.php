@@ -89,7 +89,7 @@
                                         <!-- Imagem do Livro -->
                                         <div class="flex-shrink-0">
                                             @if($item->livro->imagem_capa)
-                                                <img src="{{ $item->livro->imagem_capa }}" alt="{{ $item->livro->nome }}" class="w-20 h-28 object-cover rounded">
+                                                <img src="{{ Storage::url($item->livro->imagem_capa) }}" alt="{{ $item->livro->nome }}" class="w-20 h-28 object-cover rounded">
                                             @else
                                                 <div class="w-20 h-28 bg-base-300 rounded flex items-center justify-center">
                                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,6 +164,31 @@
                                 @endphp
                                 <span class="badge {{ $badgeClass }} badge-lg">{{ ucfirst($encomenda->estado) }}</span>
                             </div>
+
+                            @if($encomenda->isPendente() && !auth()->user()->isAdmin())
+                                <div class="divider"></div>
+                                <div class="alert alert-warning text-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                    <span>Pagamento Pendente</span>
+                                </div>
+                                 <form method="POST" action="{{ route('encomendas.pay', $encomenda) }}" class="mt-3">
+
+                                    @csrf
+
+                                    <button type="submit" class="btn btn-success w-full">
+
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+
+                                        </svg>
+
+                                        Pagar Agora
+
+                                    </button>
+
+                                </form>
+                            @endif
 
                             @if(auth()->user()->isAdmin())
                                 <div class="divider"></div>

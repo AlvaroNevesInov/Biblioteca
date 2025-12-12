@@ -87,7 +87,7 @@
                                                 @if($item->livro->imagem_capa)
                                                     <div class="avatar">
                                                         <div class="mask mask-squircle w-12 h-12">
-                                                            <img src="{{ $item->livro->imagem_capa }}" alt="{{ $item->livro->nome }}" />
+                                                            <img src="{{ Storage::url($item->livro->imagem_capa) }}" alt="{{ $item->livro->nome }}" />
                                                         </div>
                                                     </div>
                                                 @endif

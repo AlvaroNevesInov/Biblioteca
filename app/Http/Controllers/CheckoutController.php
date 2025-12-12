@@ -44,7 +44,13 @@ class CheckoutController extends Controller
             'cidade' => 'required|string|max:255',
             'codigo_postal' => 'required|string|max:20',
             'pais' => 'required|string|max:255',
+            'payment_action' => 'required|in:pay_now,pay_later',
         ]);
+
+        // Se o utilizador quer pagar depois, criar encomenda pendente
+        if ($validated['payment_action'] === 'pay_later') {
+            return $this->createPendingOrder($request);
+        }
 
         // Guardar dados de envio na sessão
         session(['shipping_data' => $validated]);

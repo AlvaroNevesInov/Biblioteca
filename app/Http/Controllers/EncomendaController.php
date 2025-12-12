@@ -6,8 +6,9 @@ use App\Models\Encomenda;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
-use Stripe\PaymentIntent;
+use Stripe\Checkout\Session as StripeSession;
 
 class EncomendaController extends Controller
 {
@@ -68,75 +69,266 @@ class EncomendaController extends Controller
         return redirect()->back()->with('success', 'Estado da encomenda atualizado com sucesso!');
     }
 
-    public function showPayment(Encomenda $encomenda)
-    {
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
+    public function payPendingOrder(Encomenda $encomenda)
 
-        // Verificar se o utilizador pode ver esta encomenda
+    {
+
+        // Verificar se o utilizador pode pagar esta encomenda
+
         if ($encomenda->user_id !== Auth::id()) {
+
             abort(403);
+
         }
+
+
 
         // Verificar se a encomenda está pendente
+
         if (!$encomenda->isPendente()) {
+
             return redirect()->route('encomendas.show', $encomenda)
+
                 ->with('error', 'Esta encomenda não está pendente de pagamento.');
+
         }
+
+
 
         $encomenda->load('items.livro');
 
+
+
         // Configurar Stripe
+
         Stripe::setApiKey(config('services.stripe.secret'));
 
-        // Criar Payment Intent
-        $paymentIntent = PaymentIntent::create([
-            'amount' => round($encomenda->total * 100), // Stripe usa centavos
-            'currency' => 'eur',
-            'metadata' => [
-                'user_id' => Auth::id(),
-                'encomenda_id' => $encomenda->id,
-            ],
-        ]);
 
-        return view('encomendas.payment', compact('encomenda', 'paymentIntent'));
-    }
-
-    public function processPayment(Request $request, Encomenda $encomenda)
-    {
-        $request->validate([
-            'payment_intent_id' => 'required|string'
-        ]);
-
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        // Verificar se o utilizador pode pagar esta encomenda
-        if ($encomenda->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        // Verificar se a encomenda está pendente
-        if (!$encomenda->isPendente()) {
-            return redirect()->route('encomendas.show', $encomenda)
-                ->with('error', 'Esta encomenda não está pendente de pagamento.');
-        }
 
         try {
+
+            // Preparar line items para o Stripe Checkout
+
+            $lineItems = [];
+
+            foreach ($encomenda->items as $item) {
+
+                $lineItems[] = [
+
+                    'price_data' => [
+
+                        'currency' => 'eur',
+
+                        'product_data' => [
+
+                            'name' => $item->livro->nome,
+
+                            'description' => 'ISBN: ' . ($item->livro->isbn ?? 'N/A'),
+
+                        ],
+
+                        'unit_amount' => round($item->preco_unitario * 100), // Stripe usa centavos
+
+                    ],
+
+                    'quantity' => $item->quantidade,
+
+                ];
+
+            }
+
+
+
+            // Criar Stripe Checkout Session
+
+            $checkoutSession = StripeSession::create([
+
+                'payment_method_types' => ['card'],
+
+                'line_items' => $lineItems,
+
+                'mode' => 'payment',
+
+                'success_url' => route('encomendas.stripe.success', $encomenda->id) . '?session_id={CHECKOUT_SESSION_ID}',
+
+                'cancel_url' => route('encomendas.show', $encomenda->id),
+
+                'customer_email' => $encomenda->email,
+
+                'metadata' => [
+
+                    'user_id' => Auth::id(),
+
+                    'encomenda_id' => $encomenda->id,
+
+                ],
+
+            ]);
+
+
+
+            Log::info('Stripe Checkout Session criada para encomenda pendente', [
+
+                'session_id' => $checkoutSession->id,
+
+                'encomenda_id' => $encomenda->id,
+
+                'user_id' => Auth::id(),
+
+            ]);
+
+
+
+            // Redirecionar para a página do Stripe
+
+            return redirect($checkoutSession->url);
+
+
+
+        } catch (\Exception $e) {
+
+            Log::error('Erro ao criar Stripe Checkout Session para encomenda pendente', [
+
+                'error' => $e->getMessage(),
+
+                'encomenda_id' => $encomenda->id,
+
+                'user_id' => Auth::id(),
+
+            ]);
+
+            return redirect()->back()->with('error', 'Erro ao inicializar o pagamento. Por favor, tente novamente.');
+
+        }
+
+    }
+
+
+
+    public function stripeSuccess(Request $request, Encomenda $encomenda)
+
+    {
+
+        $sessionId = $request->query('session_id');
+
+
+
+        if (!$sessionId) {
+
+            return redirect()->route('encomendas.show', $encomenda->id)
+
+                ->with('error', 'Sessão de pagamento inválida.');
+
+        }
+
+
+
+        // Verificar se o utilizador pode pagar esta encomenda
+
+        if ($encomenda->user_id !== Auth::id()) {
+
+            abort(403);
+
+        }
+
+
+
+        // Verificar se a encomenda está pendente
+
+        if (!$encomenda->isPendente()) {
+
+            return redirect()->route('encomendas.show', $encomenda)
+
+                ->with('info', 'Esta encomenda já foi paga.');
+
+        }
+
+
+
+        // Configurar Stripe
+
+        Stripe::setApiKey(config('services.stripe.secret'));
+
+
+
+        try {
+
+            // Recuperar a sessão do Stripe
+
+            $stripeSession = StripeSession::retrieve($sessionId);
+
+
+
+            if ($stripeSession->payment_status !== 'paid') {
+
+                return redirect()->route('encomendas.show', $encomenda->id)
+
+                    ->with('error', 'Pagamento não foi confirmado.');
+
+            }
+
+
+
             DB::beginTransaction();
 
-            // Atualizar encomenda com pagamento
+
+
+            // Atualizar encomenda
+
             $encomenda->update([
+
                 'estado' => 'paga',
-                'stripe_payment_intent_id' => $request->payment_intent_id,
+
+                'stripe_payment_intent_id' => $stripeSession->payment_intent,
+
             ]);
+
+
 
             DB::commit();
 
-            return response(route('encomendas.show', $encomenda->id));
+
+
+            Log::info('Encomenda pendente paga com sucesso', [
+
+                'encomenda_id' => $encomenda->id,
+
+                'user_id' => Auth::id(),
+
+                'session_id' => $sessionId
+
+            ]);
+
+
+
+            return redirect()->route('encomendas.show', $encomenda->id)
+
+                ->with('success', 'Pagamento realizado com sucesso!');
+
+
+
         } catch (\Exception $e) {
+
             DB::rollBack();
-            return redirect()->back()->with('error', 'Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.');
+
+            Log::error('Erro ao processar retorno do Stripe para encomenda pendente', [
+
+                'error' => $e->getMessage(),
+
+                'session_id' => $sessionId,
+
+                'encomenda_id' => $encomenda->id,
+
+                'user_id' => Auth::id()
+
+            ]);
+
+            return redirect()->route('encomendas.show', $encomenda->id)
+
+                ->with('error', 'Ocorreu um erro ao processar o pagamento. Por favor, contacte o suporte.');
+
+
+
         }
     }
 }
