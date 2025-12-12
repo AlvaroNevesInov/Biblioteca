@@ -2,28 +2,29 @@
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <h2 class="font-semibold text-xl text-base-content leading-tight">
-                Checkout - Pagamento
+                Pagamento da Encomenda #{{ $encomenda->numero_encomenda }}
             </h2>
         </div>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
-            <!-- Breadcrumb -->
-            <div class="text-sm breadcrumbs mb-6">
-                <ul>
-                    <li><a href="{{ route('carrinho.index') }}">Carrinho</a></li>
-                    <li><a href="{{ route('checkout.shipping') }}">Morada de Entrega</a></li>
-                    <li class="font-bold">Pagamento</li>
-                </ul>
-            </div>
-
             @if(session('error'))
                 <div class="alert alert-error mb-4">
                     <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <span>{{ session('error') }}</span>
                 </div>
             @endif
+
+            <!-- Voltar -->
+            <div class="mb-6">
+                <a href="{{ route('encomendas.show', $encomenda) }}" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                    Voltar
+                </a>
+            </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <!-- Formulário de Pagamento -->
@@ -54,11 +55,11 @@
                                 </div>
 
                                 <div class="card-actions justify-between mt-6">
-                                    <a href="{{ route('checkout.shipping') }}" class="btn btn-ghost">
-                                        Voltar
+                                    <a href="{{ route('encomendas.show', $encomenda) }}" class="btn btn-ghost">
+                                        Cancelar
                                     </a>
                                     <button type="submit" id="submit-button" class="btn btn-primary">
-                                        <span id="button-text">Pagar €{{ number_format($total, 2) }}</span>
+                                        <span id="button-text">Pagar €{{ number_format($encomenda->total, 2) }}</span>
                                         <span id="spinner" class="loading loading-spinner loading-sm hidden"></span>
                                     </button>
                                 </div>
@@ -71,14 +72,14 @@
                         <div class="card-body">
                             <h3 class="card-title">Morada de Entrega</h3>
                             <div class="text-sm">
-                                <p><strong>{{ $shippingData['nome_completo'] }}</strong></p>
-                                <p>{{ $shippingData['email'] }}</p>
-                                @if(isset($shippingData['telefone']))
-                                    <p>{{ $shippingData['telefone'] }}</p>
+                                <p><strong>{{ $encomenda->nome_completo }}</strong></p>
+                                <p>{{ $encomenda->email }}</p>
+                                @if($encomenda->telefone)
+                                    <p>{{ $encomenda->telefone }}</p>
                                 @endif
-                                <p class="mt-2">{{ $shippingData['morada'] }}</p>
-                                <p>{{ $shippingData['cidade'] }}, {{ $shippingData['codigo_postal'] }}</p>
-                                <p>{{ $shippingData['pais'] }}</p>
+                                <p class="mt-2">{{ $encomenda->morada }}</p>
+                                <p>{{ $encomenda->cidade }}, {{ $encomenda->codigo_postal }}</p>
+                                <p>{{ $encomenda->pais }}</p>
                             </div>
                         </div>
                     </div>
@@ -91,10 +92,10 @@
                             <h3 class="card-title">Resumo da Encomenda</h3>
 
                             <div class="space-y-2 mt-4">
-                                @foreach($carrinhoItems as $item)
+                                @foreach($encomenda->items as $item)
                                     <div class="flex justify-between text-sm">
                                         <span>{{ $item->livro->nome }} (x{{ $item->quantidade }})</span>
-                                        <span>€{{ number_format($item->quantidade * $item->livro->preco, 2) }}</span>
+                                        <span>€{{ number_format($item->subtotal, 2) }}</span>
                                     </div>
                                 @endforeach
 
@@ -102,19 +103,19 @@
 
                                 <div class="flex justify-between">
                                     <span>Subtotal</span>
-                                    <span class="font-bold">€{{ number_format($subtotal, 2) }}</span>
+                                    <span class="font-bold">€{{ number_format($encomenda->subtotal, 2) }}</span>
                                 </div>
 
                                 <div class="flex justify-between">
                                     <span>Taxas</span>
-                                    <span class="font-bold">€{{ number_format($taxas, 2) }}</span>
+                                    <span class="font-bold">€{{ number_format($encomenda->taxas, 2) }}</span>
                                 </div>
 
                                 <div class="divider my-2"></div>
 
                                 <div class="flex justify-between text-lg font-bold">
                                     <span>Total</span>
-                                    <span class="text-primary">€{{ number_format($total, 2) }}</span>
+                                    <span class="text-primary">€{{ number_format($encomenda->total, 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -199,27 +200,21 @@
                         formData.append('_token', '{{ csrf_token() }}');
                         formData.append('payment_intent_id', paymentIntent.id);
 
-                        const response = await fetch('{{ route('checkout.payment.process') }}', {
+                        const response = await fetch('{{ route('encomendas.payment.process', $encomenda) }}', {
                             method: 'POST',
-                            body: formData,
-                            headers: {
-                                'Accept': 'application/json'
-                            }
+                            body: formData
                         });
 
-                        const data = await response.json();
-
-                        if (response.ok && data.success) {
-                            window.location.href = data.redirect_url;
+                        if (response.ok) {
+                            window.location.href = await response.text();
                         } else {
-                            throw new Error(data.message || 'Erro ao processar o pagamento');
+                            throw new Error('Erro ao processar o pagamento');
                         }
                     }
                 }
             } catch (err) {
-                console.error('Erro no pagamento:', err);
-                const displayError = document.getElementById('card-errors');
-                displayError.textContent = err.message || 'Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.';
+                console.error(err);
+                alert('Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.');
 
                 // Reabilitar botão
                 submitButton.disabled = false;

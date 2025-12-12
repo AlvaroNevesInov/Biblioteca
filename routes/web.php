@@ -143,14 +143,11 @@ Route::middleware([
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/shipping', [CheckoutController::class, 'showShipping'])->name('shipping');
         Route::post('/shipping', [CheckoutController::class, 'processShipping'])->name('shipping.process');
+        Route::post('/create-pending', [CheckoutController::class, 'createPendingOrder'])->name('create-pending');
 
-        // Rotas de callback do Stripe
+        // Stripe Checkout Session callbacks
         Route::get('/stripe/success', [CheckoutController::class, 'stripeSuccess'])->name('stripe.success');
         Route::get('/stripe/cancel', [CheckoutController::class, 'stripeCancel'])->name('stripe.cancel');
-
-        // Rotas antigas (manter para compatibilidade)
-        Route::get('/payment', [CheckoutController::class, 'showPayment'])->name('payment');
-        Route::post('/payment', [CheckoutController::class, 'processPayment'])->name('payment.process');
 
         Route::get('/success/{encomenda}', [CheckoutController::class, 'success'])->name('success');
     });
@@ -161,6 +158,10 @@ Route::middleware([
     Route::prefix('encomendas')->name('encomendas.')->group(function () {
         Route::get('/', [EncomendaController::class, 'index'])->name('index');
         Route::get('/{encomenda}', [EncomendaController::class, 'show'])->name('show');
+
+        // Pagamento de encomenda pendente
+        Route::get('/{encomenda}/pagar', [EncomendaController::class, 'showPayment'])->name('payment');
+        Route::post('/{encomenda}/pagar', [EncomendaController::class, 'processPayment'])->name('payment.process');
 
         // Apenas admin pode atualizar o estado
         Route::middleware(['admin'])->group(function () {

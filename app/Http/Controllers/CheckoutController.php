@@ -109,77 +109,18 @@ class CheckoutController extends Controller
         }
     }
 
-    public function showPayment()
+    public function createPendingOrder(Request $request)
     {
-        if (!session('shipping_data')) {
-            return redirect()->route('checkout.shipping');
-        }
-        /** @var \App\Models\User $user */
-        $user = Auth::user();
-
-        $carrinhoItems = $user->carrinhoItems()->with('livro')->get();
-
-        if ($carrinhoItems->isEmpty()) {
-            return redirect()->route('carrinho.index')->with('error', 'O seu carrinho está vazio!');
-        }
-
-        $subtotal = $carrinhoItems->sum(function ($item) {
-            return $item->quantidade * $item->livro->preco;
-        });
-
-        $taxas = 0;
-        $total = $subtotal + $taxas;
-
-        $shippingData = session('shipping_data');
-
-        // Configurar Stripe
-        Stripe::setApiKey(config('services.stripe.secret'));
-
-        try {
-            // Criar Payment Intent
-            $paymentIntent = PaymentIntent::create([
-                'amount' => round($total * 100), // Stripe usa centavos
-                'currency' => 'eur',
-                'metadata' => [
-                    'user_id' => Auth::id(),
-                    'user_role' => $user->role,
-                ],
-            ]);
-
-            Log::info('Payment Intent criado com sucesso', [
-                'payment_intent_id' => $paymentIntent->id,
-                'user_id' => Auth::id(),
-                'user_role' => $user->role,
-                'amount' => $total
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Erro ao criar Payment Intent', [
-                'error' => $e->getMessage(),
-                'user_id' => Auth::id(),
-                'user_role' => $user->role
-            ]);
-            return redirect()->back()->with('error', 'Erro ao inicializar o pagamento. Por favor, tente novamente.');
-        }
-
-        return view('checkout.payment', compact(
-            'carrinhoItems',
-            'subtotal',
-            'taxas',
-            'total',
-            'shippingData',
-            'paymentIntent'
-        ));
-    }
-
-    public function processPayment(Request $request)
-    {
-        $request->validate([
-            'payment_intent_id' => 'required|string'
+        // Validar dados de envio
+        $validated = $request->validate([
+            'nome_completo' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'telefone' => 'nullable|string|max:20',
+            'morada' => 'required|string',
+            'cidade' => 'required|string|max:255',
+            'codigo_postal' => 'required|string|max:20',
+            'pais' => 'required|string|max:255',
         ]);
-
-        if (!session('shipping_data')) {
-            return redirect()->route('checkout.shipping');
-        }
 
         /** @var \App\Models\User $user */
         $user = Auth::user();
@@ -200,23 +141,21 @@ class CheckoutController extends Controller
             $taxas = 0;
             $total = $subtotal + $taxas;
 
-            $shippingData = session('shipping_data');
-
-            // Criar encomenda
+            // Criar encomenda com estado pendente
             $encomenda = Encomenda::create([
                 'user_id' => Auth::id(),
-                'nome_completo' => $shippingData['nome_completo'],
-                'email' => $shippingData['email'],
-                'telefone' => $shippingData['telefone'] ?? null,
-                'morada' => $shippingData['morada'],
-                'cidade' => $shippingData['cidade'],
-                'codigo_postal' => $shippingData['codigo_postal'],
-                'pais' => $shippingData['pais'],
+                'nome_completo' => $validated['nome_completo'],
+                'email' => $validated['email'],
+                'telefone' => $validated['telefone'] ?? null,
+                'morada' => $validated['morada'],
+                'cidade' => $validated['cidade'],
+                'codigo_postal' => $validated['codigo_postal'],
+                'pais' => $validated['pais'],
                 'subtotal' => $subtotal,
                 'taxas' => $taxas,
                 'total' => $total,
-                'estado' => 'paga',
-                'stripe_payment_intent_id' => $request->payment_intent_id,
+                'estado' => 'pendente',
+                'stripe_payment_intent_id' => null,
             ]);
 
             // Criar items da encomenda
@@ -230,28 +169,22 @@ class CheckoutController extends Controller
                 ]);
             }
 
-            /** @var \App\Models\User $user */
-            $user = Auth::user();
-
             // Limpar carrinho
             $user->carrinhoItems()->delete();
 
-            // Limpar sessão
-            session()->forget('shipping_data');
-
             DB::commit();
 
-            return response()->json([
-                'success' => true,
-                'redirect_url' => route('checkout.success', $encomenda->id)
+            Log::info('Encomenda pendente criada com sucesso', [
+                'encomenda_id' => $encomenda->id,
+                'user_id' => Auth::id(),
             ]);
+
+            return redirect()->route('encomendas.show', $encomenda->id)
+                ->with('success', 'Encomenda criada com sucesso! Pode efetuar o pagamento quando desejar.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Erro no processamento do pagamento: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.'
-            ], 500);
+            Log::error('Erro ao criar encomenda pendente: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Ocorreu um erro ao criar a encomenda. Por favor, tente novamente.');
         }
     }
 

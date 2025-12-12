@@ -13,8 +13,7 @@
             <div class="text-sm breadcrumbs mb-6">
                 <ul>
                     <li><a href="{{ route('carrinho.index') }}">Carrinho</a></li>
-                    <li class="font-bold">Morada de Entrega</li>
-                    <li class="text-base-content/50">Pagamento</li>
+                    <li class="font-bold">Finalizar Encomenda</li>
                 </ul>
             </div>
 
@@ -135,18 +134,67 @@
                             </div>
                         </div>
 
+                        <!-- Opções de Pagamento -->
+                        <div class="divider my-6"></div>
+
+                        <div class="alert alert-info mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            <div>
+                                <h4 class="font-bold">Escolha como pretende continuar</h4>
+                                <div class="text-xs">Pode pagar agora ou guardar a encomenda para pagar mais tarde.</div>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="payment_action" id="payment_action" value="">
+
                         <!-- Botões -->
                         <div class="card-actions justify-between mt-6">
                             <a href="{{ route('carrinho.index') }}" class="btn btn-ghost">
                                 Voltar ao Carrinho
                             </a>
-                            <button type="submit" class="btn btn-primary">
-                                Continuar para Pagamento
-                            </button>
+                            <div class="flex gap-3">
+                                <button type="button" onclick="payLater()" class="btn btn-outline">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Pagar Depois
+                                </button>
+                                <button type="button" onclick="payNow()" class="btn btn-primary">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                                    </svg>
+                                    Pagar Agora
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        const form = document.querySelector('form');
+        const paymentAction = document.getElementById('payment_action');
+
+        function payNow() {
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            paymentAction.value = 'pay_now';
+            form.action = '{{ route('checkout.shipping.process') }}';
+            form.submit();
+        }
+
+        function payLater() {
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+            paymentAction.value = 'pay_later';
+            form.action = '{{ route('checkout.create-pending') }}';
+            form.submit();
+        }
+    </script>
 </x-app-layout>

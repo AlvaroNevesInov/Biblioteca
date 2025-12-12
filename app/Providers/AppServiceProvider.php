@@ -4,10 +4,13 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Fortify;
 use Livewire\Livewire;
 use Illuminate\Auth\Events\Login;
 use App\Listeners\TriggerPopularBooksImport;
+use App\Models\Encomenda;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +18,25 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar listener para importação de livros populares no login
         Event::listen(Login::class, TriggerPopularBooksImport::class);
+
+        // Compartilhar contagem de encomendas pendentes com todas as views
+        View::composer('*', function ($view) {
+            if (Auth::check()) {
+                /** @var \App\Models\User $user */
+                $user = Auth::user();
+                $encomendasPendentesCount = 0;
+
+                if (!$user->isAdmin()) {
+                    $encomendasPendentesCount = $user->encomendas()
+                        ->where('estado', 'pendente')
+                        ->count();
+                }
+
+                $view->with('encomendasPendentesCount', $encomendasPendentesCount);
+            } else {
+                $view->with('encomendasPendentesCount', 0);
+            }
+        });
 
         // Personalização das views do Fortify (opcional)
         Fortify::loginView(function () {
