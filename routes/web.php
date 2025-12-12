@@ -143,8 +143,15 @@ Route::middleware([
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/shipping', [CheckoutController::class, 'showShipping'])->name('shipping');
         Route::post('/shipping', [CheckoutController::class, 'processShipping'])->name('shipping.process');
+
+        // Rotas de callback do Stripe
+        Route::get('/stripe/success', [CheckoutController::class, 'stripeSuccess'])->name('stripe.success');
+        Route::get('/stripe/cancel', [CheckoutController::class, 'stripeCancel'])->name('stripe.cancel');
+
+        // Rotas antigas (manter para compatibilidade)
         Route::get('/payment', [CheckoutController::class, 'showPayment'])->name('payment');
         Route::post('/payment', [CheckoutController::class, 'processPayment'])->name('payment.process');
+
         Route::get('/success/{encomenda}', [CheckoutController::class, 'success'])->name('success');
     });
 

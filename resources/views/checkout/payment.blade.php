@@ -201,19 +201,25 @@
 
                         const response = await fetch('{{ route('checkout.payment.process') }}', {
                             method: 'POST',
-                            body: formData
+                            body: formData,
+                            headers: {
+                                'Accept': 'application/json'
+                            }
                         });
 
-                        if (response.ok) {
-                            window.location.href = await response.text();
+                        const data = await response.json();
+
+                        if (response.ok && data.success) {
+                            window.location.href = data.redirect_url;
                         } else {
-                            throw new Error('Erro ao processar o pagamento');
+                            throw new Error(data.message || 'Erro ao processar o pagamento');
                         }
                     }
                 }
             } catch (err) {
-                console.error(err);
-                alert('Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.');
+                console.error('Erro no pagamento:', err);
+                const displayError = document.getElementById('card-errors');
+                displayError.textContent = err.message || 'Ocorreu um erro ao processar o pagamento. Por favor, tente novamente.';
 
                 // Reabilitar botão
                 submitButton.disabled = false;
