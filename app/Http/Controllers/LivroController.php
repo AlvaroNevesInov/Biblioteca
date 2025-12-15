@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Livro;
 use App\Models\Editora;
 use App\Models\Autor;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 
 class LivroController extends Controller
@@ -70,6 +71,13 @@ class LivroController extends Controller
         $livro = Livro::create($validated);
         $livro->autores()->attach($request->autores);
 
+        LogService::logCreate(
+            'Livros',
+            $livro->id,
+            "Livro '{$livro->nome}' criado - ISBN: {$livro->isbn}" .
+            ($livro->preco ? ", Preço: €{$livro->preco}" : '')
+        );
+
         return redirect()->route('livros.index')
             ->with('success', 'Livro criado com sucesso!');
     }
@@ -101,8 +109,16 @@ class LivroController extends Controller
             $validated['imagem_capa'] = $request->file('imagem_capa')->store('livros', 'public');
         }
 
+        $oldNome = $livro->nome;
         $livro->update($validated);
         $livro->autores()->sync($request->autores);
+
+        LogService::logUpdate(
+            'Livros',
+            $livro->id,
+            "Livro '{$oldNome}' atualizado" .
+            ($oldNome !== $livro->nome ? " (nome alterado para '{$livro->nome}')" : '')
+        );
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro atualizado com sucesso!');
@@ -110,7 +126,16 @@ class LivroController extends Controller
 
     public function destroy(Livro $livro)
     {
+        $livroNome = $livro->nome;
+        $livroId = $livro->id;
+
         $livro->delete();
+
+        LogService::logDelete(
+            'Livros',
+            $livroId,
+            "Livro '{$livroNome}' eliminado permanentemente"
+        );
 
         return redirect()->route('livros.index')
             ->with('success', 'Livro excluído com sucesso!');

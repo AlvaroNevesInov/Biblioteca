@@ -9,6 +9,7 @@ use App\Models\AvailabilityAlert;
 use App\Mail\NovaRequisicaoAdmin;
 use App\Mail\NovaRequisicaoCidadao;
 use App\Mail\LivroDisponivel;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -163,6 +164,12 @@ class RequisicaoController extends Controller
             $delay += 10; // incrementa para múltiplos admins
         }
 
+        LogService::logCreate(
+            'Requisições',
+            $requisicao->id,
+            "Nova requisição do livro '{$livro->nome}' pelo utilizador {$user->name}"
+        );
+
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição criada com sucesso! Aguarde aprovação do administrador.');
     }
@@ -219,6 +226,13 @@ class RequisicaoController extends Controller
 
         $requisicao->update(['estado' => 'aprovada']);
 
+        LogService::log(
+            'Requisições',
+            'Aprovar',
+            $requisicao->id,
+            "Requisição #{$requisicao->id} aprovada - Livro: '{$requisicao->livro->nome}', Utilizador: {$requisicao->user->name}"
+        );
+
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição aprovada com sucesso!');
     }
@@ -239,6 +253,13 @@ class RequisicaoController extends Controller
             'observacoes' => $validated['observacoes'] ?? $requisicao->observacoes,
         ]);
 
+        LogService::log(
+            'Requisições',
+            'Rejeitar',
+            $requisicao->id,
+            "Requisição #{$requisicao->id} rejeitada - Livro: '{$requisicao->livro->nome}', Utilizador: {$requisicao->user->name}"
+        );
+
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição rejeitada.');
     }
@@ -256,6 +277,13 @@ class RequisicaoController extends Controller
             'estado' => 'devolvida',
             'data_devolucao' => Carbon::today(),
         ]);
+
+        LogService::log(
+            'Requisições',
+            'Devolver',
+            $requisicao->id,
+            "Livro '{$requisicao->livro->nome}' devolvido pelo utilizador {$requisicao->user->name}"
+        );
 
         return redirect()->route('requisicoes.index')
             ->with('success', 'Livro marcado como devolvido!');
@@ -295,6 +323,13 @@ class RequisicaoController extends Controller
         // Notificar cidadãos interessados no livro
         $this->notificarInteressados($requisicao->livro);
 
+        LogService::log(
+            'Requisições',
+            'Confirmar Receção',
+            $requisicao->id,
+            "Receção do livro '{$requisicao->livro->nome}' confirmada - {$mensagem}"
+        );
+
         return redirect()->route('requisicoes.index')
             ->with('success', $mensagem);
     }
@@ -315,7 +350,17 @@ class RequisicaoController extends Controller
                 ->with('error', 'Apenas requisições pendentes podem ser canceladas.');
         }
 
+        $livroNome = $requisicao->livro->nome;
+        $userName = $requisicao->user->name;
+        $requisicaoId = $requisicao->id;
+
         $requisicao->delete();
+
+        LogService::logDelete(
+            'Requisições',
+            $requisicaoId,
+            "Requisição #{$requisicaoId} cancelada - Livro: '{$livroNome}', Utilizador: {$userName}"
+        );
 
         return redirect()->route('requisicoes.index')
             ->with('success', 'Requisição cancelada com sucesso!');

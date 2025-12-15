@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Encomenda;
 use App\Models\EncomendaItem;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -185,6 +186,12 @@ class CheckoutController extends Controller
                 'user_id' => Auth::id(),
             ]);
 
+            LogService::logCreate(
+                'Encomendas',
+                $encomenda->id,
+                "Encomenda pendente #{$encomenda->numero_encomenda} criada (Valor: €{$encomenda->total}, {$carrinhoItems->count()} itens)"
+            );
+
             return redirect()->route('encomendas.show', $encomenda->id)
                 ->with('success', 'Encomenda criada com sucesso! Pode efetuar o pagamento quando desejar.');
         } catch (\Exception $e) {
@@ -278,6 +285,12 @@ class CheckoutController extends Controller
                 'session_id' => $sessionId
             ]);
 
+            LogService::logCreate(
+                'Encomendas',
+                $encomenda->id,
+                "Encomenda #{$encomenda->numero_encomenda} criada e paga (Valor: €{$encomenda->total}, {$carrinhoItems->count()} itens)"
+            );
+
             return redirect()->route('checkout.success', $encomenda->id);
 
         } catch (\Exception $e) {
@@ -295,6 +308,13 @@ class CheckoutController extends Controller
         Log::info('Pagamento cancelado pelo usuário', [
             'user_id' => Auth::id()
         ]);
+
+        LogService::log(
+            'Checkout',
+            'Pagamento Cancelado',
+            null,
+            'Utilizador cancelou o pagamento no Stripe'
+        );
 
         return redirect()->route('checkout.shipping')->with('error', 'Pagamento cancelado. Pode tentar novamente quando quiser.');
     }

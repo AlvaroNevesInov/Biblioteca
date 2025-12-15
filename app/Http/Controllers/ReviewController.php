@@ -7,6 +7,7 @@ use App\Models\Requisicao;
 use App\Models\User;
 use App\Mail\NovoReviewAdmin;
 use App\Mail\StatusReviewCidadao;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -64,6 +65,12 @@ class ReviewController extends Controller
                 ->later(now()->addSeconds(10 + ($index * 20)), new NovoReviewAdmin($review));
         }
 
+        LogService::logCreate(
+            'Reviews',
+            $review->id,
+            "Novo review criado para o livro '{$requisicao->livro->nome}' pelo utilizador {$review->user->name}"
+        );
+
         return redirect()->route('requisicoes.index')
             ->with('success', 'Review submetido com sucesso! Aguarde a aprovação do administrador.');
     }
@@ -98,6 +105,13 @@ class ReviewController extends Controller
         Mail::to($review->user->email)
             ->later(now()->addSeconds(15), new StatusReviewCidadao($review));
 
+        LogService::log(
+            'Reviews',
+            'Aprovar',
+            $review->id,
+            "Review #{$review->id} aprovado - Livro: '{$review->livro->nome}', Utilizador: {$review->user->name}"
+        );
+
         return redirect()->route('reviews.index')
             ->with('success', 'Review aprovado com sucesso!');
     }
@@ -125,6 +139,13 @@ class ReviewController extends Controller
         Mail::to($review->user->email)
             ->later(now()->addSeconds(15), new StatusReviewCidadao($review));
 
+        LogService::log(
+            'Reviews',
+            'Recusar',
+            $review->id,
+            "Review #{$review->id} recusado - Livro: '{$review->livro->nome}', Utilizador: {$review->user->name}"
+        );
+
         return redirect()->route('reviews.index')
             ->with('success', 'Review recusado com sucesso!');
     }
@@ -134,7 +155,17 @@ class ReviewController extends Controller
      */
     public function destroy(Review $review)
     {
+        $livroNome = $review->livro->nome;
+        $userName = $review->user->name;
+        $reviewId = $review->id;
+
         $review->delete();
+
+        LogService::logDelete(
+            'Reviews',
+            $reviewId,
+            "Review #{$reviewId} eliminado - Livro: '{$livroNome}', Utilizador: {$userName}"
+        );
 
         return redirect()->route('reviews.index')
             ->with('success', 'Review eliminado com sucesso!');

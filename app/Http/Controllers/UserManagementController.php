@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -37,13 +38,19 @@ class UserManagementController extends Controller
             'password' => ['required', 'string', Password::default(), 'confirmed'],
         ]);
 
-        User::create([
+        $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'admin',
             'email_verified_at' => now(), // Auto-verificar utilizadores criados por admin
         ]);
+
+        LogService::logCreate(
+            'Utilizadores',
+            $user->id,
+            "Novo utilizador administrador '{$user->name}' criado"
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilizador criado com sucesso!');
@@ -69,16 +76,27 @@ class UserManagementController extends Controller
             'password' => ['nullable', 'string', Password::default(), 'confirmed'],
         ]);
 
+        $oldName = $user->name;
         $user->name = $validated['name'];
         $user->email = $validated['email'];
         $user->role = $validated['role'];
 
+        $passwordChanged = false;
         // Só atualiza a password se foi fornecida
         if (!empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
+            $passwordChanged = true;
         }
 
         $user->save();
+
+        LogService::logUpdate(
+            'Utilizadores',
+            $user->id,
+            "Utilizador '{$oldName}' atualizado" .
+            ($oldName !== $user->name ? " (nome alterado para '{$user->name}')" : '') .
+            ($passwordChanged ? ' (senha alterada)' : '')
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilizador atualizado com sucesso!');
@@ -95,7 +113,16 @@ class UserManagementController extends Controller
                 ->with('error', 'Não pode eliminar a sua própria conta!');
         }
 
+        $userName = $user->name;
+        $userId = $user->id;
+
         $user->delete();
+
+        LogService::logDelete(
+            'Utilizadores',
+            $userId,
+            "Utilizador '{$userName}' eliminado permanentemente"
+        );
 
         return redirect()->route('admin.users.index')
             ->with('success', 'Utilizador eliminado com sucesso!');

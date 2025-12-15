@@ -14,6 +14,7 @@ use App\Http\Controllers\AvailabilityAlertController;
 use App\Http\Controllers\CarrinhoController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\EncomendaController;
+use App\Http\Controllers\LogController;
 
 Route::get('/', function () {
     return view('home');
@@ -88,6 +89,10 @@ Route::middleware([
         Route::post('/reviews/{review}/aprovar', [ReviewController::class, 'aprovar'])->name('reviews.aprovar');
         Route::post('/reviews/{review}/recusar', [ReviewController::class, 'recusar'])->name('reviews.recusar');
         Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+        // Rotas de Logs - Gestão Admin
+        Route::get('/logs', [LogController::class, 'index'])->name('logs.index');
+        Route::get('/logs/stats', [LogController::class, 'stats'])->name('logs.stats');
     });
 
     // =========================================

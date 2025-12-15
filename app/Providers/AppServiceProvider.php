@@ -9,7 +9,10 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Fortify;
 use Livewire\Livewire;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use App\Listeners\TriggerPopularBooksImport;
+use App\Listeners\LogSuccessfulLogin;
+use App\Listeners\LogSuccessfulLogout;
 use App\Models\Encomenda;
 
 class AppServiceProvider extends ServiceProvider
@@ -18,6 +21,10 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar listener para importação de livros populares no login
         Event::listen(Login::class, TriggerPopularBooksImport::class);
+
+        // Registrar listeners para logs de autenticação
+        Event::listen(Login::class, LogSuccessfulLogin::class);
+        Event::listen(Logout::class, LogSuccessfulLogout::class);
 
         // Compartilhar contagem de encomendas pendentes com todas as views
         View::composer('*', function ($view) {
@@ -55,5 +62,6 @@ class AppServiceProvider extends ServiceProvider
         Livewire::component('requisicoes-table', \App\Http\Livewire\RequisicoesTable::class);
         Livewire::component('cidadaos-table', \App\Http\Livewire\CidadaosTable::class);
         Livewire::component('reviews-table', \App\Http\Livewire\ReviewsTable::class);
+        Livewire::component('logs-table', \App\Http\Livewire\LogsTable::class);
     }
 }

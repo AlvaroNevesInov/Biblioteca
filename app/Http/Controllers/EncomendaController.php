@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Encomenda;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -62,9 +63,17 @@ class EncomendaController extends Controller
             'estado' => 'required|in:pendente,paga,processando,enviada,entregue,cancelada'
         ]);
 
+        $oldEstado = $encomenda->estado;
         $encomenda->update([
             'estado' => $request->estado
         ]);
+
+        LogService::log(
+            'Encomendas',
+            'Atualizar Estado',
+            $encomenda->id,
+            "Estado da encomenda #{$encomenda->numero_encomenda} alterado de '{$oldEstado}' para '{$request->estado}'"
+        );
 
         return redirect()->back()->with('success', 'Estado da encomenda atualizado com sucesso!');
     }
@@ -177,6 +186,13 @@ class EncomendaController extends Controller
 
             ]);
 
+            LogService::log(
+                'Encomendas',
+                'Iniciar Pagamento',
+                $encomenda->id,
+                "Pagamento iniciado para encomenda pendente #{$encomenda->numero_encomenda} (Valor: €{$encomenda->total})"
+            );
+
 
 
             // Redirecionar para a página do Stripe
@@ -282,6 +298,13 @@ class EncomendaController extends Controller
                 'stripe_payment_intent_id' => $stripeSession->payment_intent,
 
             ]);
+
+            LogService::log(
+                'Encomendas',
+                'Pagamento Concluído',
+                $encomenda->id,
+                "Pagamento concluído para encomenda #{$encomenda->numero_encomenda} (Valor: €{$encomenda->total})"
+            );
 
 
 

@@ -32,6 +32,10 @@
                         <x-nav-link href="{{ route('reviews.index') }}" :active="request()->routeIs('reviews.*')">
                             {{ __('Reviews') }}
                         </x-nav-link>
+
+                        <x-nav-link href="{{ route('logs.index') }}" :active="request()->routeIs('logs.*')">
+                            {{ __('Logs') }}
+                        </x-nav-link>
                     @endif
                 </div>
             </div>
@@ -206,6 +210,16 @@
             <x-responsive-nav-link href="{{ route('availability-alerts.index') }}" :active="request()->routeIs('availability-alerts.*')">
                 {{ __('Alertas') }}
             </x-responsive-nav-link>
+
+            @if($user->isAdmin())
+                <x-responsive-nav-link href="{{ route('reviews.index') }}" :active="request()->routeIs('reviews.*')">
+                    {{ __('Reviews') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link href="{{ route('logs.index') }}" :active="request()->routeIs('logs.*')">
+                    {{ __('Logs') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

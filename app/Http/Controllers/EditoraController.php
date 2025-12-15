@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Editora;
+use App\Services\LogService;
 use Illuminate\Http\Request;
 
 class EditoraController extends Controller
@@ -28,7 +29,13 @@ class EditoraController extends Controller
             $validated['logotipo'] = $request->file('logotipo')->store('editoras', 'public');
         }
 
-        Editora::create($validated);
+        $editora = Editora::create($validated);
+
+        LogService::logCreate(
+            'Editoras',
+            $editora->id,
+            "Editora '{$editora->nome}' criada"
+        );
 
         return redirect()->route('editoras.index')
             ->with('success', 'Editora criada com sucesso!');
@@ -50,7 +57,15 @@ class EditoraController extends Controller
             $validated['logotipo'] = $request->file('logotipo')->store('editoras', 'public');
         }
 
+        $oldNome = $editora->nome;
         $editora->update($validated);
+
+        LogService::logUpdate(
+            'Editoras',
+            $editora->id,
+            "Editora '{$oldNome}' atualizada" .
+            ($oldNome !== $editora->nome ? " (nome alterado para '{$editora->nome}')" : '')
+        );
 
         return redirect()->route('editoras.index')
             ->with('success', 'Editora atualizada com sucesso!');
@@ -58,7 +73,16 @@ class EditoraController extends Controller
 
     public function destroy(Editora $editora)
     {
+        $editoraNome = $editora->nome;
+        $editoraId = $editora->id;
+
         $editora->delete();
+
+        LogService::logDelete(
+            'Editoras',
+            $editoraId,
+            "Editora '{$editoraNome}' eliminada permanentemente"
+        );
 
         return redirect()->route('editoras.index')
             ->with('success', 'Editora excluída com sucesso!');
