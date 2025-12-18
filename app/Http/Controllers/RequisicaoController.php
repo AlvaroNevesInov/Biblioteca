@@ -89,6 +89,12 @@ class RequisicaoController extends Controller
                 ->with('error', 'Este livro já não está disponível para requisição.');
         }
 
+        // Verificar se há stock disponível
+        if ($livro->stock <= 0) {
+            return redirect()->route('requisicoes.create')
+                ->with('error', 'Este livro não tem stock disponível no momento.');
+        }
+
         $requisicaoExistente = Requisicao::where('user_id', Auth::id())
             ->where('livro_id', $validated['livro_id'])
             ->whereIn('estado', ['pendente', 'aprovada'])

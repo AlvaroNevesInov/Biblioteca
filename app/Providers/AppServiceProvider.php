@@ -13,12 +13,15 @@ use Illuminate\Auth\Events\Logout;
 use App\Listeners\TriggerPopularBooksImport;
 use App\Listeners\LogSuccessfulLogin;
 use App\Listeners\LogSuccessfulLogout;
-use App\Models\Encomenda;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+
+        Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
+
         // Registrar listener para importação de livros populares no login
         Event::listen(Login::class, TriggerPopularBooksImport::class);
 

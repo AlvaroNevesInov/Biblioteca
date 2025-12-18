@@ -27,6 +27,7 @@ class LivroFactory extends Factory
             'bibliografia' => $this->faker->paragraph(),
             'imagem_capa' => null,
             'preco' => $this->faker->randomFloat(2, 5, 50),
+            'stock' => $this->faker->numberBetween(0, 20),
         ];
     }
 }
