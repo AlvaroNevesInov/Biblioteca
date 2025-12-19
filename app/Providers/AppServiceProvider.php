@@ -9,25 +9,20 @@ use Illuminate\Support\Facades\Auth;
 use Laravel\Fortify\Fortify;
 use Livewire\Livewire;
 use Illuminate\Auth\Events\Login;
-use Illuminate\Auth\Events\Logout;
 use App\Listeners\TriggerPopularBooksImport;
-use App\Listeners\LogSuccessfulLogin;
-use App\Listeners\LogSuccessfulLogout;
 use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
-
         Route::aliasMiddleware('admin', \App\Http\Middleware\AdminMiddleware::class);
 
         // Registrar listener para importação de livros populares no login
         Event::listen(Login::class, TriggerPopularBooksImport::class);
 
-        // Registrar listeners para logs de autenticação
-        Event::listen(Login::class, LogSuccessfulLogin::class);
-        Event::listen(Logout::class, LogSuccessfulLogout::class);
+        // Nota: Os listeners LogSuccessfulLogin e LogSuccessfulLogout são
+        // automaticamente registrados pelo Laravel através do auto-discovery
 
         // Compartilhar contagem de encomendas pendentes com todas as views
         View::composer('*', function ($view) {

@@ -187,6 +187,7 @@ class ImportPopularBooksJob implements ShouldQueue
             'bibliografia' => $this->formatBibliografia($book),
             'imagem_capa' => $imagePath,
             'preco' => $book['price'],
+            'stock' => 1,
         ]);
 
         // 5. Associar os autores
